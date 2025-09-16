@@ -19,9 +19,11 @@ Copy-Item $manifest $dest -Force
 
 $zipName = "Easy.Compressor-$target.zip"
 
-# Nueva lógica para manejar la exclusión de archivos
-$exclude = @("*.zip", "build-release.ps1", "manifest.chrome.json", "manifest.edge.json", "manifest.firefox.json")
-$itemsToCompress = Get-ChildItem -Path . -Recurse | Where-Object { $_.Name -notin $exclude -and $_.FullName -notmatch "manifest.json"}
+# Nueva lógica: Obtener todos los archivos excepto los que queremos excluir
+$itemsToExclude = @("*.zip", "build-release.ps1", "manifest.chrome.json", "manifest.edge.json", "manifest.firefox.json")
+$itemsToCompress = Get-ChildItem -Path . -Recurse | Where-Object { 
+    $_.Name -notin $itemsToExclude -and $_.FullName -notlike "*manifest.json*" 
+}
 
 if (Test-Path $zipName) { Remove-Item $zipName }
 Compress-Archive -Path $itemsToCompress.FullName -DestinationPath $zipName -CompressionLevel Optimal
