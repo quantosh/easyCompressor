@@ -2,6 +2,10 @@ name: Build Extension Releases
 
 on:
   workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Tag name for the release'
+        required: true
   push:
     tags:
       - 'v*'
@@ -9,26 +13,30 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@v4
 
       - name: Build Chrome Release
-        run: |
-          pwsh ./scripts/build-release.ps1 chrome
-      
+        run: pwsh ./scripts/build-release.ps1 chrome
+
       - name: Build Edge Release
-        run: |
-          pwsh ./scripts/build-release.ps1 edge
+        run: pwsh ./scripts/build-release.ps1 edge
 
       - name: Build Firefox Release
-        run: |
-          pwsh ./scripts/build-release.ps1 firefox
-      
+        run: pwsh ./scripts/build-release.ps1 firefox
+
       - name: Get tag name
         id: tag
-        run: echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $env:GITHUB_ENV
+        shell: bash
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+          else
+            echo "TAG_NAME=${{ github.event.inputs.tag_name }}" >> $GITHUB_ENV
+          fi
 
       - name: Create Release and Upload Artifacts
         uses: actions/create-release@v1
@@ -40,7 +48,7 @@ jobs:
           body: "Automated release for ${{ env.TAG_NAME }}"
           draft: false
           prerelease: false
-          
+
       - name: Upload Release Asset - Chrome
         uses: actions/upload-release-asset@v1
         env:
@@ -50,7 +58,7 @@ jobs:
           asset_path: ./Easy.Compressor-chrome.zip
           asset_name: Easy.Compressor-chrome.zip
           asset_content_type: application/zip
-      
+
       - name: Upload Release Asset - Edge
         uses: actions/upload-release-asset@v1
         env:
@@ -60,7 +68,7 @@ jobs:
           asset_path: ./Easy.Compressor-edge.zip
           asset_name: Easy.Compressor-edge.zip
           asset_content_type: application/zip
-          
+
       - name: Upload Release Asset - Firefox
         uses: actions/upload-release-asset@v1
         env:
