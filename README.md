@@ -45,6 +45,45 @@ Google exige un pago para publicar extensiones, incluso gratuitas. Este proyecto
 
 Desarrollado por [quantosh](https://github.com/quantosh) y colaboradores.
 
+# Guía de colaboración para easyCompressor
+
+## Flujo de trabajo con ramas
+
+Para mantener la calidad y estabilidad del proyecto, hemos implementado las siguientes reglas de trabajo con ramas:
+
+### 1. Rama principal (`main`)
+- **No se permite hacer push directo a `main`.**
+- Todos los cambios en `main` deben llegar a través de _Pull Requests_ (PR) provenientes de otras ramas, preferiblemente desde `dev`.
+- Los PRs serán revisados antes de fusionarse (merge) a `main`.
+- Solo se fusionan a `main` cambios que forman parte de una versión estable o un release.
+
+### 2. Rama de desarrollo (`dev`)
+- El desarrollo activo debe hacerse en la rama `dev`.
+- Se permite hacer push directo a `dev`.
+- Cuando se considere que el código en `dev` está listo para una nueva versión estable, se debe crear un _Pull Request_ de `dev` a `main`.
+
+### 3. Cómo contribuir
+
+1. Haz tus cambios en una rama basada en `dev` (puedes crear ramas de características o bugfix si lo prefieres).
+2. Cuando termines, haz push a tu rama y crea un _Pull Request_ hacia `dev`.
+3. Solo cuando se vaya a publicar una nueva versión, se debe crear un _Pull Request_ de `dev` a `main`.
+4. No intentes hacer push directo a `main`: GitHub lo impedirá.
+
+### Resumen visual
+
+```
+main   <---  PR (solo releases)
+ ^
+ |
+dev  <---  push directo permitido
+```
+
+Si tienes dudas, pregunta antes de abrir un PR.
+
+---
+
+¡Gracias por contribuir y ayudar a mantener un flujo de trabajo ordenado!
+
 ---
 
 ¡Gracias por usar software libre!
