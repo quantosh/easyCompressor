@@ -32,6 +32,15 @@ jobs:
             exit 1
           }
 
+      - name: Build Chrome Release
+        run: pwsh ./scripts/build-release.ps1 chrome
+
+      - name: Build Edge Release
+        run: pwsh ./scripts/build-release.ps1 edge
+
+      - name: Build Firefox Release
+        run: pwsh ./scripts/build-release.ps1 firefox
+
       - name: Create Release and Upload Artifacts
         id: create_release
         uses: actions/create-release@v1
