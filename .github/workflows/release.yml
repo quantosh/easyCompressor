@@ -1,5 +1,15 @@
 name: Build Extension Releases
 
+on:
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Tag name for the release'
+        required: true
+  push:
+    tags:
+      - 'v*'
+
 jobs:
   build:
     runs-on: windows-latest
@@ -21,18 +31,6 @@ jobs:
             Write-Host "ERROR: tag_name input is required when running manually."
             exit 1
           }
-
-      # Paso para construir el release ZIP de Chrome
-      - name: Build Chrome Release
-        run: pwsh scripts/build-release.ps1 chrome
-
-      # Paso para construir el release ZIP de Edge
-      - name: Build Edge Release
-        run: pwsh scripts/build-release.ps1 edge
-
-      # Paso para construir el release ZIP de Firefox
-      - name: Build Firefox Release
-        run: pwsh scripts/build-release.ps1 firefox
 
       - name: Create Release and Upload Artifacts
         id: create_release
