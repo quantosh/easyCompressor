@@ -1,5 +1,5 @@
 # build-release.ps1
-# Use: .\build-release.ps1 chrome|edge|firefox
+# Uso: .\build-release.ps1 chrome|edge|firefox
 
 param(
     [Parameter(Mandatory=$true)]
