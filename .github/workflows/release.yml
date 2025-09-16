@@ -10,32 +10,34 @@ jobs:
   build:
     runs-on: windows-latest
     permissions:
-      contents: write 
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
       - name: Build Chrome Release
-        run: pwsh ./scripts/build-release.ps1 chrome
+        run: |
+          pwsh ./scripts/build-release.ps1 chrome
       
       - name: Build Edge Release
-        run: pwsh ./scripts/build-release.ps1 edge
+        run: |
+          pwsh ./scripts/build-release.ps1 edge
 
       - name: Build Firefox Release
-        run: pwsh ./scripts/build-release.ps1 firefox
+        run: |
+          pwsh ./scripts/build-release.ps1 firefox
       
       - name: Get tag name
-        id: tag_name
-        run: echo "::set-output name=TAG::${GITHUB_REF/refs\/tags\//}"
+        id: tag
+        run: echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $env:GITHUB_ENV
 
       - name: Create Release and Upload Artifacts
-        id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ steps.tag_name.outputs.TAG }}
-          body: "Automated release based on tag ${{ steps.tag_name.outputs.TAG }}"
+          tag_name: ${{ env.TAG_NAME }}
+          release_name: Release ${{ env.TAG_NAME }}
+          body: "Automated release for ${{ env.TAG_NAME }}"
           draft: false
           prerelease: false
           
