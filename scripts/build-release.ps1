@@ -1,5 +1,5 @@
 # build-release.ps1
-# Uso: .\build-release.ps1 chrome|edge|firefox
+# Use: .\build-release.ps1 chrome|edge|firefox
 
 param(
     [Parameter(Mandatory=$true)]
@@ -19,13 +19,14 @@ Copy-Item $manifest $dest -Force
 
 $zipName = "Easy.Compressor-$target.zip"
 
-# Nueva lógica: Obtener todos los archivos excepto los que queremos excluir
+$destinationPath = Join-Path (Get-Location) $zipName
+
 $itemsToExclude = @("*.zip", "build-release.ps1", "manifest.chrome.json", "manifest.edge.json", "manifest.firefox.json")
 $itemsToCompress = Get-ChildItem -Path . -Recurse | Where-Object { 
-    $_.Name -notin $itemsToExclude -and $_.FullName -notlike "*manifest.json*" 
+    $_.Name -notin $itemsToExclude -and $_.FullName
 }
 
-if (Test-Path $zipName) { Remove-Item $zipName }
-Compress-Archive -Path $itemsToCompress.FullName -DestinationPath $zipName -CompressionLevel Optimal
+if (Test-Path $destinationPath) { Remove-Item $destinationPath }
+Compress-Archive -Path $itemsToCompress.FullName -DestinationPath $destinationPath -CompressionLevel Optimal
 
-Write-Host "Release package created: $zipName"
+Write-Host "Release package created: $destinationPath"
