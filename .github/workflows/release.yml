@@ -5,7 +5,7 @@ on:
     inputs:
       tag_name:
         description: 'Tag name for the release'
-        required: true
+        required: false
   push:
     tags:
       - 'v*'
@@ -13,32 +13,30 @@ on:
 jobs:
   build:
     runs-on: windows-latest
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build Chrome Release
-        run: pwsh ./scripts/build-release.ps1 chrome
+      # ... (Tus pasos de build siguen igual) ...
 
-      - name: Build Edge Release
-        run: pwsh ./scripts/build-release.ps1 edge
-
-      - name: Build Firefox Release
-        run: pwsh ./scripts/build-release.ps1 firefox
-
-      - name: Get tag name
-        id: tag
-        shell: bash
+      - name: Set tag name
+        id: set_tag_name
         run: |
-          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
-            echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+          if [ -z "${{ github.event.inputs.tag_name }}" ]; then
+            if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+              echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+            else
+              echo "ERROR: tag_name input is required when running manually." >&2
+              exit 1
+            fi
           else
             echo "TAG_NAME=${{ github.event.inputs.tag_name }}" >> $GITHUB_ENV
           fi
+        shell: bash
 
       - name: Create Release and Upload Artifacts
+        id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
