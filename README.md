@@ -1,36 +1,30 @@
 # Easy Compressor
 
-**Easy Compressor** es una extensión para Chrome que te permite aplicar compresión dinámica al audio de cualquier pestaña, con control visual y parámetros ajustables.
+**Easy Compressor** es una extensión para navegador que te permite aplicar compresión dinámica de audio en cualquier pestaña, con medidor visual y controles avanzados.
 
-## Instalación manual (no disponible en Chrome Web Store)
+## Instalación manual y releases para cada navegador
 
-> **Nota:** Esta extensión no está publicada en la Chrome Web Store porque Google exige un pago para publicar, lo cual no es viable para un proyecto gratuito y de código abierto. Puedes instalarla manualmente siguiendo estos pasos:
+> **Nota:** Esta extensión no está publicada en la Chrome Web Store porque Google exige un pago para publicar, lo cual no es viable para un proyecto gratuito y de código abierto. Puedes instalarla manualmente o descargar el ZIP listo para tu navegador desde la sección de releases.
 
-### 1. Descarga o clona el repositorio
+### 1. Descarga el ZIP correcto para tu navegador
 
-Descarga este proyecto como ZIP o clónalo con:
+Ve a la sección [Releases](https://github.com/quantosh/easyCompressor/releases) y descarga:
+- `Easy.Compressor-chrome.zip` para Chrome
+- `Easy.Compressor-edge.zip` para Edge
+- `Easy.Compressor-firefox.zip` para Firefox
 
-```sh
-git clone https://github.com/quantosh/easyCompressor.git
-```
+Cada ZIP contiene el manifest adecuado para ese navegador.
 
-O simplemente descarga la carpeta `Easy.Compressor` a tu PC.
+### 2. Instala la extensión manualmente
 
-### 2. Abre Chrome y ve a la página de extensiones
+**Chrome/Edge:**
+- Ve a `chrome://extensions/`
+- Activa el modo **Desarrollador**
+- Haz clic en **"Cargar descomprimida"** y selecciona la carpeta descomprimida
 
-Navega a:
-
-```
-chrome://extensions/
-```
-
-Activa el modo **Desarrollador** (arriba a la derecha).
-
-### 3. Carga la extensión sin empaquetar
-
-Haz clic en **"Cargar descomprimida"** y selecciona la carpeta `Easy.Compressor` (donde está el `manifest.json`).
-
-¡Listo! Ya puedes usar la extensión.
+**Firefox:**
+- Ve a `about:addons`
+- Haz clic en el engranaje > **Instalar complemento desde archivo...** y selecciona el ZIP
 
 ## Uso
 
@@ -42,6 +36,11 @@ Haz clic en **"Cargar descomprimida"** y selecciona la carpeta `Easy.Compressor`
 
 Google exige un pago para publicar extensiones, incluso gratuitas. Este proyecto es open source y no tiene ánimo de lucro, por lo que solo está disponible para instalación manual.
 
+## Multi-navegador
+
+- Elige el ZIP adecuado para tu navegador en la sección de releases.
+- El código fuente es el mismo para todos, solo cambia el manifest.
+
 ## Créditos
 
 Desarrollado por [quantosh](https://github.com/quantosh) y colaboradores.
@@ -49,3 +48,7 @@ Desarrollado por [quantosh](https://github.com/quantosh) y colaboradores.
 ---
 
 ¡Gracias por usar software libre!
+
+---
+
+[English README here](README.en.md)
