@@ -18,22 +18,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # ... (Tus pasos de build siguen igual) ...
-
       - name: Set tag name
         id: set_tag_name
+        shell: pwsh
         run: |
-          if [ -z "${{ github.event.inputs.tag_name }}" ]; then
-            if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
-              echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
-            else
-              echo "ERROR: tag_name input is required when running manually." >&2
-              exit 1
-            fi
-          else
-            echo "TAG_NAME=${{ github.event.inputs.tag_name }}" >> $GITHUB_ENV
-          fi
-        shell: bash
+          if ($env:GITHUB_EVENT_INPUTS_TAG_NAME) {
+            echo "TAG_NAME=$env:GITHUB_EVENT_INPUTS_TAG_NAME" | Out-File -FilePath $env:GITHUB_ENV -Append
+          } elseif ($env:GITHUB_REF -like 'refs/tags/*') {
+            $tagName = $env:GITHUB_REF -replace 'refs/tags/', ''
+            echo "TAG_NAME=$tagName" | Out-File -FilePath $env:GITHUB_ENV -Append
+          } else {
+            Write-Host "ERROR: tag_name input is required when running manually."
+            exit 1
+          }
 
       - name: Create Release and Upload Artifacts
         id: create_release
