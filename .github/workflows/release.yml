@@ -20,17 +20,17 @@ jobs:
 
       - name: Set tag name
         id: set_tag_name
-        shell: pwsh
         run: |
-          if ($env:GITHUB_EVENT_INPUTS_TAG_NAME) {
-            echo "TAG_NAME=$env:GITHUB_EVENT_INPUTS_TAG_NAME" | Out-File -FilePath $env:GITHUB_ENV -Append
-          } elseif ($env:GITHUB_REF -like 'refs/tags/*') {
-            $tagName = $env:GITHUB_REF -replace 'refs/tags/', ''
-            echo "TAG_NAME=$tagName" | Out-File -FilePath $env:GITHUB_ENV -Append
-          } else {
-            Write-Host "ERROR: tag_name input is required when running manually."
+          if [ -n "${{ github.event.inputs.tag_name }}" ]; then
+            echo "TAG_NAME=${{ github.event.inputs.tag_name }}" >> $GITHUB_ENV
+          elif [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            tagName="${GITHUB_REF#refs/tags/}"
+            echo "TAG_NAME=$tagName" >> $GITHUB_ENV
+          else
+            echo "ERROR: tag_name input is required when running manually."
             exit 1
-          }
+          fi
+        shell: bash
 
       - name: Build Chrome Release
         run: pwsh ./scripts/build-release.ps1 chrome
