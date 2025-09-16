@@ -1,3 +1,5 @@
+name: Build Extension Releases
+
 jobs:
   build:
     runs-on: windows-latest
