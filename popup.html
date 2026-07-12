@@ -32,6 +32,7 @@
       color: var(--text);
       font-size: 0.875rem;
       -webkit-font-smoothing: antialiased;
+      overflow: hidden;
     }
     .container { display: flex; flex-direction: column; gap: 0.75rem; }
     .header { display: flex; align-items: center; justify-content: space-between; }
@@ -98,10 +99,10 @@
       border: 2px solid var(--slider-thumb-border); cursor: pointer;
     }
     .reduction-badge {
-      display: none; align-items: center; gap: 0.35rem;
+      visibility: hidden; display: flex; align-items: center; gap: 0.35rem;
       font-size: 0.75rem; color: var(--danger); font-weight: 600;
     }
-    .reduction-badge.visible { display: flex; }
+    .reduction-badge.visible { visibility: visible; }
     .reduction-badge::before {
       content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--danger); flex-shrink: 0;
     }
