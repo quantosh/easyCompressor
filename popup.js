@@ -168,8 +168,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // EQ visibility toggle (advanced mode)
     eqToggle.addEventListener('click', () => {
         const vis = eqSection.classList.contains('hidden');
-        eqSection.classList.toggle('hidden', vis);
-        eqToggle.classList.toggle('on', !vis);
+        eqSection.classList.toggle('hidden', !vis);
+        eqToggle.classList.toggle('on', vis);
     });
 
     // EQ enable/disable toggle
