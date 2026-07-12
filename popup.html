@@ -1,189 +1,264 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Easy Compressor</title>
-  <style>
-    :root {
-      color-scheme: light dark;
-      --bg: light-dark(#ffffff, #292a2d);
-      --surface: light-dark(#f8f9fa, #35363a);
-      --text: light-dark(#202124, #e8eaed);
-      --text-secondary: light-dark(#5f6368, #9aa0a6);
-      --text-muted: light-dark(#80868b, #80868b);
-      --border: light-dark(#dadce0, #5f6368);
-      --border-hover: light-dark(#bdc1c6, #7a7f85);
-      --accent: light-dark(#1a73e8, #8ab4f8);
-      --accent-hover: light-dark(#1765cc, #a8c7fa);
-      --success: light-dark(#188038, #81c995);
-      --danger: light-dark(#d93025, #f28b82);
-      --dot-inactive: light-dark(#dadce0, #5f6368);
-      --slider-track: light-dark(#dadce0, #5f6368);
-      --slider-thumb-border: light-dark(#ffffff, #292a2d);
-    }
-
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: system-ui, -apple-system, sans-serif;
-      width: 300px;
-      padding: 1rem;
-      background: var(--bg);
-      color: var(--text);
-      font-size: 0.875rem;
-      -webkit-font-smoothing: antialiased;
-      overflow: hidden;
-    }
-    .container { display: flex; flex-direction: column; gap: 0.75rem; }
-    .header { display: flex; align-items: center; justify-content: space-between; }
-    .header-title { display: flex; align-items: center; gap: 0.5rem; }
-    .header-title h1 { font-size: 1rem; font-weight: 700; letter-spacing: -0.01em; }
-    .status-dot {
-      width: 8px; height: 8px; border-radius: 50%; background: var(--dot-inactive);
-      transition: background 0.3s, box-shadow 0.3s; flex-shrink: 0;
-    }
-    .status-dot.active { background: var(--success); box-shadow: 0 0 6px color-mix(in srgb, var(--success) 60%, transparent); }
-    .header-version { font-size: 0.7rem; color: var(--text-muted); }
-    .description { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4; }
-    .compress-button {
-      width: 100%; padding: 0.65rem 1.25rem; font-size: 0.9rem; font-weight: 600;
-      font-family: inherit; color: #fff; background: var(--accent); border: 1px solid var(--accent);
-      border-radius: 8px; cursor: pointer; transition: background 0.2s, border-color 0.2s, transform 0.1s;
-    }
-    .compress-button:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
-    .compress-button:active { transform: scale(0.98); }
-    .compress-button.active { background: transparent; border-color: var(--success); color: var(--success); }
-    .compress-button.active:hover { background: color-mix(in srgb, var(--success) 10%, transparent); }
-    .meter-section { display: flex; flex-direction: column; gap: 0.35rem; }
-    .meter-labels {
-      display: flex; justify-content: space-between; font-size: 0.7rem;
-      color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;
-    }
-    .meter-wrap {
-      position: relative; height: 24px; background: var(--surface);
-      border-radius: 6px; overflow: hidden; border: 1px solid var(--border);
-    }
-    #meter-canvas { display: block; width: 100%; height: 100%; background: transparent; }
-    .settings-toggle {
-      width: 100%; padding: 0.4rem; font-size: 0.8rem; font-weight: 500;
-      font-family: inherit; color: var(--text-secondary); background: transparent;
-      border: 1px dashed var(--border); border-radius: 6px; cursor: pointer; transition: color 0.2s, border-color 0.2s;
-    }
-    .settings-toggle:hover { color: var(--text); border-color: var(--border-hover); }
-    #advanced-controls {
-      display: none; flex-direction: column; gap: 1rem;
-      padding: 0.75rem; background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
-    }
-    #advanced-controls.visible { display: flex; }
-    .section-title {
-      font-size: 0.7rem; font-weight: 600; color: var(--text-muted);
-      text-transform: uppercase; letter-spacing: 0.08em;
-    }
-    .control-group { display: flex; flex-direction: column; gap: 0.3rem; }
-    .control-group label {
-      display: flex; justify-content: space-between; align-items: center;
-      font-size: 0.8rem; color: var(--text-secondary);
-    }
-    .control-group label span { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
-    input[type="range"] {
-      width: 100%; height: 6px; -webkit-appearance: none; appearance: none;
-      background: var(--slider-track); border-radius: 3px; outline: none; cursor: pointer;
-    }
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none; width: 14px; height: 14px; background: var(--accent);
-      border-radius: 50%; border: 2px solid var(--slider-thumb-border); cursor: pointer; transition: background 0.2s;
-    }
-    input[type="range"]::-webkit-slider-thumb:hover { background: var(--accent-hover); }
-    input[type="range"]::-moz-range-thumb {
-      width: 14px; height: 14px; background: var(--accent); border-radius: 50%;
-      border: 2px solid var(--slider-thumb-border); cursor: pointer;
-    }
-    .reduction-badge {
-      visibility: hidden; display: flex; align-items: center; gap: 0.35rem;
-      font-size: 0.75rem; color: var(--danger); font-weight: 600;
-    }
-    .reduction-badge.visible { visibility: visible; }
-    .reduction-badge::before {
-      content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--danger); flex-shrink: 0;
-    }
-    .presets { display: flex; gap: 0.35rem; flex-wrap: wrap; }
-    .preset-btn {
-      padding: 0.25rem 0.5rem; font-size: 0.7rem; font-weight: 500; font-family: inherit;
-      color: var(--text-secondary); background: transparent; border: 1px solid var(--border); border-radius: 4px;
-      cursor: pointer; transition: color 0.2s, border-color 0.2s, background 0.2s;
-    }
-    .preset-btn:hover { color: var(--text); border-color: var(--border-hover); }
-    .preset-btn.active { color: var(--accent); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
-    .eq-slider-group { display: flex; flex-direction: column; gap: 0.5rem; }
-    .divider { height: 1px; background: var(--border); border: none; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Easy Compressor</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{color-scheme:light dark}
+body{font-family:system-ui,-apple-system,sans-serif;width:300px;overflow:hidden;background:var(--bg);color:var(--text);font-size:.8125rem;-webkit-font-smoothing:antialiased;padding:12px}
+:root{--bg:light-dark(#f0f1f3,#0b0e14);--surface:light-dark(#fff,#11151d);--text:light-dark(#202124,#e8eaed);--text-dim:light-dark(#5f6368,#6b7280);--border:light-dark(#dadce0,#1f2937);--accent:light-dark(#1a73e8,#3b82f6);--green:light-dark(#059669,#10b981);--orange:light-dark(#d97706,#f59e0b);--red:light-dark(#dc2626,#ef4444);--slider-track:light-dark(#e5e7eb,#151b26);--slider-fill:light-dark(#1a73e8,#3b82f6);--thumb-border:light-dark(#fff,#0b0e14)}
+.container{display:flex;flex-direction:column;gap:0}
+.header{display:flex;align-items:center;justify-content:space-between;padding-bottom:10px}
+.header-left{display:flex;align-items:center;gap:8px}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--text-dim);flex-shrink:0;transition:.3s}
+.status-dot.active{background:var(--green);box-shadow:0 0 8px color-mix(in srgb,var(--green) 60%,transparent)}
+.header h1{font-size:.8125rem;font-weight:700;letter-spacing:-.01em}
+.header-version{font-size:.65rem;color:var(--text-dim)}
+.toggle-row{display:flex;align-items:center;gap:6px;padding-bottom:6px}
+.toggle-switch{position:relative;width:36px;height:20px;flex-shrink:0;cursor:pointer}
+.toggle-switch input{position:absolute;opacity:0;width:0;height:0}
+.toggle-track{position:absolute;inset:0;background:var(--slider-track);border-radius:10px;transition:.25s}
+.toggle-thumb{position:absolute;width:16px;height:16px;top:2px;left:2px;background:var(--text);border-radius:50%;transition:.25s}
+.toggle-switch input:checked+.toggle-track{background:var(--green)}
+.toggle-switch input:checked~.toggle-thumb{left:18px}
+.toggle-label{font-size:.75rem;font-weight:600;color:var(--text);user-select:none;cursor:pointer}
+.presets{display:flex;gap:4px;padding-bottom:8px}
+.preset-btn{padding:3px 8px;font-size:.675rem;font-weight:600;font-family:inherit;color:var(--text-dim);background:var(--slider-track);border:1px solid transparent;border-radius:4px;cursor:pointer;transition:.15s}
+.preset-btn:hover{color:var(--text);border-color:var(--border)}
+.preset-btn.active{color:var(--bg);background:var(--text);border-color:var(--text)}
+.vu-wrap{position:relative;height:26px;background:var(--slider-track);border-radius:5px;overflow:hidden;border:1px solid var(--border);margin-bottom:8px}
+#vu{display:block;width:100%;height:100%}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px 10px;margin-bottom:6px;box-shadow:inset 0 1px 2px rgba(0,0,0,.05)}
+.panel-title{font-size:.625rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em;padding-bottom:6px}
+.slider-group{display:flex;flex-direction:column;gap:0}
+.slider-row{display:flex;align-items:center;gap:8px;height:22px;padding:1px 0}
+.slider-row label{font-size:.7rem;color:var(--text-dim);width:52px;flex-shrink:0}
+.slider-track-wrap{position:relative;flex:1;height:4px;cursor:pointer}
+.slider-track{border-radius:2px;background:var(--slider-track);width:100%;height:100%;position:absolute}
+.slider-fill{border-radius:2px;height:100%;position:absolute;top:0;pointer-events:none}
+.slider-thumb{position:absolute;width:12px;height:12px;border-radius:50%;background:var(--slider-fill);border:2px solid var(--thumb-border);top:50%;transform:translate(-50%,-50%);pointer-events:none;box-shadow:0 0 3px rgba(0,0,0,.2)}
+.slider-val{font-size:.675rem;font-weight:600;font-variant-numeric:tabular-nums;width:40px;text-align:right;color:var(--text);flex-shrink:0;letter-spacing:-.01em}
+@media(prefers-color-scheme:light){
+:root{--bg:#f0f1f3;--surface:#fff;--text:#202124;--text-dim:#5f6368;--border:#dadce0;--accent:#1a73e8;--green:#059669;--slider-track:#e5e7eb;--slider-fill:#1a73e8;--thumb-border:#fff}
+body{background:linear-gradient(180deg,#f0f1f3,#e8eaed)}
+.panel{box-shadow:inset 0 1px 2px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04)}
+}
+@media(prefers-color-scheme:dark){
+:root{--bg:#0b0e14;--surface:#11151d;--text:#e8eaed;--text-dim:#6b7280;--border:#1f2937;--accent:#3b82f6;--green:#10b981;--slider-track:#151b26;--slider-fill:#3b82f6;--thumb-border:#0b0e14}
+body{background:linear-gradient(180deg,#0b0e14,#090b10)}
+.panel{box-shadow:inset 0 1px 2px rgba(0,0,0,.3)}
+}
+</style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <div class="header-title">
-        <span class="status-dot" id="statusDot"></span>
-        <h1>Easy Compressor</h1>
-      </div>
-      <span class="header-version">v1.0</span>
+<div class="container">
+  <div class="header">
+    <div class="header-left">
+      <span class="status-dot" id="dot"></span>
+      <h1>Easy Compressor</h1>
     </div>
+    <span class="header-version">v1.0</span>
+  </div>
 
-    <p class="description">
-      Applies a dynamic range compressor and EQ to audio in the current tab.
-    </p>
+  <div class="vu-wrap"><canvas id="vu" width="276" height="26"></canvas></div>
 
-    <button id="compressButton" class="compress-button">
-      Enable Compressor
-    </button>
+  <div class="toggle-row">
+    <label class="toggle-switch">
+      <input type="checkbox" id="toggleInput">
+      <span class="toggle-track"></span>
+      <span class="toggle-thumb"></span>
+    </label>
+    <label class="toggle-label" id="toggleLabel">Compressor OFF</label>
+  </div>
 
-    <div class="meter-section">
-      <div class="meter-labels">
-        <span>Level</span>
-        <span class="reduction-badge" id="reductionBadge">Gain reduction</span>
-      </div>
-      <div class="meter-wrap">
-        <canvas id="meter-canvas" width="268" height="24"></canvas>
-      </div>
-    </div>
+  <div class="presets" id="presets">
+    <button class="preset-btn active" data-p="flat">Flat</button>
+    <button class="preset-btn" data-p="bass">Bass</button>
+    <button class="preset-btn" data-p="voice">Voice</button>
+    <button class="preset-btn" data-p="loud">Loud</button>
+  </div>
 
-    <button id="settingsButton" class="settings-toggle">⚙ Settings</button>
-
-    <div id="advanced-controls">
-      <div class="section-title">Equalizer</div>
-      <div class="presets" id="eqPresets">
-        <button class="preset-btn active" data-preset="flat">Flat</button>
-        <button class="preset-btn" data-preset="bass-boost">Bass Boost</button>
-        <button class="preset-btn" data-preset="voice">Voice</button>
-        <button class="preset-btn" data-preset="loudness">Loudness</button>
-      </div>
-      <div class="eq-slider-group">
-        <div class="control-group">
-          <label>Bass <span id="eq-bass-value">0 dB</span></label>
-          <input type="range" id="eq-bass" min="-12" max="12" value="0" step="1">
-        </div>
-        <div class="control-group">
-          <label>Mid <span id="eq-mid-value">0 dB</span></label>
-          <input type="range" id="eq-mid" min="-12" max="12" value="0" step="1">
-        </div>
-        <div class="control-group">
-          <label>Treble <span id="eq-treble-value">0 dB</span></label>
-          <input type="range" id="eq-treble" min="-12" max="12" value="0" step="1">
-        </div>
-      </div>
-
-      <hr class="divider">
-
-      <div class="section-title">Compressor</div>
-      <div class="control-group">
-        <label>Threshold <span id="threshold-value">-30 dB</span></label>
-        <input type="range" id="threshold-slider" min="-60" max="0" value="-30" step="1">
-      </div>
-      <div class="control-group">
-        <label>Ratio <span id="ratio-value">8:1</span></label>
-        <input type="range" id="ratio-slider" min="1" max="20" value="8" step="1">
-      </div>
+  <div class="panel">
+    <div class="panel-title">Equalizer</div>
+    <div class="slider-group">
+      <div class="slider-row"><label>Bass</label><div class="slider-track-wrap" data-s="bass"><div class="slider-track"></div><div class="slider-fill" style="background:var(--green)"></div><div class="slider-thumb" style="background:var(--green)"></div></div><span class="slider-val" id="v-bass">0 dB</span></div>
+      <div class="slider-row"><label>Mid</label><div class="slider-track-wrap" data-s="mid"><div class="slider-track"></div><div class="slider-fill" style="background:var(--green)"></div><div class="slider-thumb" style="background:var(--green)"></div></div><span class="slider-val" id="v-mid">0 dB</span></div>
+      <div class="slider-row"><label>Treble</label><div class="slider-track-wrap" data-s="treble"><div class="slider-track"></div><div class="slider-fill" style="background:var(--green)"></div><div class="slider-thumb" style="background:var(--green)"></div></div><span class="slider-val" id="v-treble">0 dB</span></div>
     </div>
   </div>
-  <script src="popup.js"></script>
+
+  <div class="panel">
+    <div class="panel-title">Compressor</div>
+    <div class="slider-group">
+      <div class="slider-row"><label>Threshold</label><div class="slider-track-wrap" data-s="threshold"><div class="slider-track"></div><div class="slider-fill" style="background:var(--accent)"></div><div class="slider-thumb"></div></div><span class="slider-val" id="v-threshold">-30 dB</span></div>
+      <div class="slider-row"><label>Ratio</label><div class="slider-track-wrap" data-s="ratio"><div class="slider-track"></div><div class="slider-fill" style="background:var(--accent)"></div><div class="slider-thumb"></div></div><span class="slider-val" id="v-ratio">8:1</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const PRESETS={flat:{bass:0,mid:0,treble:0},bass:{bass:6,mid:0,treble:2},voice:{bass:-3,mid:5,treble:3},loud:{bass:4,mid:0,treble:4}};
+const SLIDERS=[
+  {key:'bass',min:-12,max:12,step:1,fmt:v=>`${v>0?'+':''}${v} dB`,def:0,el:null,valEl:null},
+  {key:'mid',min:-12,max:12,step:1,fmt:v=>`${v>0?'+':''}${v} dB`,def:0,el:null,valEl:null},
+  {key:'treble',min:-12,max:12,step:1,fmt:v=>`${v>0?'+':''}${v} dB`,def:0,el:null,valEl:null},
+  {key:'threshold',min:-60,max:0,step:1,fmt:v=>`${v} dB`,def:-30,el:null,valEl:null},
+  {key:'ratio',min:1,max:20,step:1,fmt:v=>`${v}:1`,def:8,el:null,valEl:null}
+];
+
+const state={enabled:false,preset:'flat',bass:0,mid:0,treble:0,threshold:-30,ratio:8};
+let vuLevel=0,vuReduction=0,vuPeak=0,vuDecay=0,vuAnim=null;
+
+const canvas=document.getElementById('vu'),ctx=canvas.getContext('2d');
+const dot=document.getElementById('dot'),toggle=document.getElementById('toggleInput'),toggleLabel=document.getElementById('toggleLabel');
+const presetBtns=document.querySelectorAll('[data-p]');
+
+function updateUI(){
+  dot.classList.toggle('active',state.enabled);
+  toggle.checked=state.enabled;
+  toggleLabel.textContent=state.enabled?'Compressor ON':'Compressor OFF';
+  document.querySelector('.container').style.opacity=state.enabled?'1':'0.35';
+}
+
+function setPreset(name){
+  state.preset=name;
+  const v=PRESETS[name];
+  if(!v)return;
+  state.bass=v.bass;state.mid=v.mid;state.treble=v.treble;
+  presetBtns.forEach(b=>b.classList.toggle('active',b.dataset.p===name));
+  SLIDERS.forEach(s=>{if(s.key!=='threshold'&&s.key!=='ratio')updateSlider(s)});
+  sendState();
+}
+
+function updateSlider(s,val){
+  const v=val!==undefined?val:state[s.key];
+  if(val!==undefined)state[s.key]=v;
+  const wrap=s.el;
+  const fill=wrap.querySelector('.slider-fill');
+  const thumb=wrap.querySelector('.slider-thumb');
+  const pct=((v-s.min)/(s.max-s.min))*100;
+  fill.style.width=pct+'%';
+  thumb.style.left=pct+'%';
+  s.valEl.textContent=s.fmt(v);
+}
+
+function sliderFromEvent(wrap,clientX){
+  const rect=wrap.getBoundingClientRect();
+  return Math.max(0,Math.min(1,(clientX-rect.left)/rect.width));
+}
+
+let drag=null;
+
+function startDrag(e,wrap){
+  const t=e.touches?e.touches[0]:e;
+  const sdef=SLIDERS.find(s=>s.el===wrap);
+  if(!sdef)return;
+  const pct=sliderFromEvent(wrap,t.clientX);
+  const val=Math.round((sdef.min+pct*(sdef.max-sdef.min))/sdef.step)*sdef.step;
+  state[sdef.key]=Math.max(sdef.min,Math.min(sdef.max,val));
+  updateSlider(sdef);
+  if(state.preset!=='custom'){
+    state.preset='custom';
+    presetBtns.forEach(b=>b.classList.remove('active'));
+  }
+  drag=sdef;
+  e.preventDefault();
+}
+
+function moveDrag(e){
+  if(!drag)return;
+  const t=e.touches?e.touches[0]:e;
+  const pct=sliderFromEvent(drag.el,t.clientX);
+  const val=Math.round((drag.min+pct*(drag.max-drag.min))/drag.step)*drag.step;
+  state[drag.key]=Math.max(drag.min,Math.min(drag.max,val));
+  updateSlider(drag);
+}
+
+function endDrag(){
+  if(!drag)return;
+  sendState();
+  drag=null;
+}
+
+function sendState(){
+  chrome.runtime.sendMessage({action:'updateState',...state}).catch(()=>{});
+  // also propagate compressor toggle & settings to background
+  // consolidate into one message
+}
+
+function drawVU(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const w=canvas.width,h=canvas.height;
+  const rms=vuLevel*1.2;
+  const scaled=Math.min(1,rms);
+  vuReduction=Math.max(0,vuReduction-0.003);
+  const grad=ctx.createLinearGradient(0,0,w,0);
+  grad.addColorStop(0,'#10b981');grad.addColorStop(0.6,'#f59e0b');grad.addColorStop(1,'#ef4444');
+  const barW=w*Math.min(1,scaled);
+  ctx.fillStyle=grad;ctx.fillRect(0,0,barW,h);
+  ctx.globalAlpha=.12;ctx.fillStyle='#fff';ctx.fillRect(0,0,barW,h);ctx.globalAlpha=1;
+  if(vuReduction>0.003){
+    const rw=w*Math.min(1,vuReduction*1.5);
+    ctx.fillStyle='rgba(239,68,68,.35)';ctx.fillRect(Math.max(0,barW-rw),0,rw,h);
+  }
+  if(scaled>vuPeak){vuPeak=scaled;vuDecay=0}else{vuDecay+=.015;vuPeak=Math.max(0,vuPeak-vuDecay)}
+  if(vuPeak>.005){ctx.fillStyle='#fff';ctx.fillRect(w*vuPeak-1,0,2,h)}
+  vuLevel=Math.max(0,Math.min(1,vuLevel+(Math.random()-.5)*.06));
+  vuAnim=requestAnimationFrame(drawVU);
+}
+
+// Init sliders
+SLIDERS.forEach(s=>{
+  s.el=document.querySelector(`[data-s="${s.key}"]`);
+  s.valEl=document.getElementById(`v-${s.key}`);
+  updateSlider(s,s.def);
+  // mouse events
+  s.el.addEventListener('mousedown',e=>startDrag(e,s.el));
+  // touch events
+  s.el.addEventListener('touchstart',e=>startDrag(e,s.el),{passive:false});
+});
+
+// Global move/up for drag robustness
+window.addEventListener('mousemove',moveDrag);
+window.addEventListener('mouseup',endDrag);
+window.addEventListener('touchmove',moveDrag,{passive:false});
+window.addEventListener('touchend',endDrag);
+
+// Toggle
+toggle.addEventListener('change',()=>{
+  state.enabled=toggle.checked;
+  updateUI();
+  sendState();
+});
+
+// Presets
+presetBtns.forEach(btn=>btn.addEventListener('click',()=>setPreset(btn.dataset.p)));
+
+// Load state from background on init
+chrome.runtime.sendMessage({action:'getState'},(bgState)=>{
+  if(bgState){
+    state.enabled=!!bgState.active;
+    state.threshold=bgState.threshold??-30;
+    state.ratio=bgState.ratio??8;
+    const eq=bgState.eq||{};
+    state.bass=eq.bass??0;state.mid=eq.mid??0;state.treble=eq.treble??0;
+    // detect preset
+    let found=null;
+    for(const[n,v]of Object.entries(PRESETS)){if(v.bass===state.bass&&v.mid===state.mid&&v.treble===state.treble){found=n;break}}
+    if(found)setPreset(found);else{presetBtns.forEach(b=>b.classList.remove('active'));state.preset='custom'}
+    SLIDERS.forEach(s=>updateSlider(s));
+    updateUI();
+  }
+});
+
+// Audio level listener
+chrome.runtime.onMessage.addListener(msg=>{
+  if(msg.action==='audioLevel'){vuLevel=msg.level||0;vuReduction=Math.abs(msg.reduction||0)}
+});
+
+drawVU();
+</script>
 </body>
 </html>
