@@ -19,11 +19,11 @@ function saveState() {
 }
 
 function loadState() {
-    chrome.storage.local.get(['compressor', 'eq', 'mode'], (result) => {
+    chrome.storage.local.get(['compressor', 'eq', 'mode']).then((result) => {
         if (result.compressor) compressorState = { ...compressorState, ...result.compressor };
         if (result.eq) eqState = { ...eqState, ...result.eq };
         if (result.mode) modePref = result.mode;
-    });
+    }).catch(() => {});
 }
 
 let modePref = 'simple';
