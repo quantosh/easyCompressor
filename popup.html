@@ -25,7 +25,7 @@ body{font-family:system-ui,-apple-system,sans-serif;width:300px;padding:.625rem;
 .settings-menu{display:none;flex-direction:column;gap:.5rem;padding:.625rem .75rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;position:relative;z-index:2}
 .settings-menu.visible{display:flex}
 .menu-row{display:flex;align-items:center;justify-content:space-between}
-.menu-row label{font-size:.75rem;color:var(--text-secondary);cursor:pointer;user-select:none}
+.menu-row p{font-size:.75rem;color:light-dark(#475569,#94a3b8)}
 .menu-credits{font-size:.65rem;color:var(--text-muted);text-align:center;line-height:1.5;padding-top:4px;border-top:1px solid var(--border)}
 
 /* ============ VU METER ============ */
@@ -103,10 +103,20 @@ input[type="range"]::-moz-range-thumb{width:12px;height:12px;background:var(--ac
 .toggle-md input:checked+.track{background:var(--accent)}
 .toggle-md input:checked~.thumb{left:18px}
 
-/* Settings popover */
+/* Settings popover (BusApp style) */
 .settings-menu{display:none;flex-direction:column;position:relative;z-index:2}
 .settings-menu.visible{display:flex}
-.menu-credits{font-size:.65rem;color:var(--text-muted);text-align:center;line-height:1.5;padding-top:8px;border-top:1px solid var(--border)}
+.about-card{background:light-dark(#fff,#1e293b);border:1px solid light-dark(#e2e8f0,#334155);border-radius:16px;padding:1.25rem;box-shadow:0 10px 25px rgba(0,0,0,.2)}
+.about-card .text-center{text-align:center}
+.about-card .about-icon{width:32px;height:32px;margin:0 auto 8px;display:block}
+.about-card h2{font-size:1rem;font-weight:700;color:light-dark(#1e293b,#f1f5f9)}
+.about-card .about-version{font-size:.7rem;color:var(--success);font-weight:600;margin-top:2px}
+.about-card hr{margin:12px 0;border:none;height:1px;background:light-dark(#e2e8f0,#334155)}
+.about-card p{font-size:.7rem;color:light-dark(#475569,#94a3b8);line-height:1.5}
+.about-card .about-link{color:var(--success);font-weight:600;text-decoration:none}
+.about-card .about-link:hover{text-decoration:underline}
+.about-card .about-btn{width:100%;margin-top:12px;background:var(--success);color:#fff;padding:8px;border:none;border-radius:12px;font-size:.8rem;font-weight:600;font-family:inherit;cursor:pointer;transition:background .2s}
+.about-card .about-btn:hover{filter:brightness(1.1)}
 </style>
 </head>
 <body>
@@ -122,20 +132,28 @@ input[type="range"]::-moz-range-thumb{width:12px;height:12px;background:var(--ac
     </div>
   </div>
 
-  <!-- SETTINGS POPOVER -->
+  <!-- SETTINGS POPOVER (BusApp style) -->
   <div class="settings-menu" id="settingsMenu">
-    <div class="panel">
+    <div class="about-card">
+      <div class="text-center">
+        <svg class="about-icon" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        <h2>Easy Compressor</h2>
+        <p class="about-version">v1.0</p>
+      </div>
+      <hr>
       <div class="menu-row">
-        <label>Advanced Mode</label>
+        <p>Advanced Mode</p>
         <label class="toggle-md">
           <input type="checkbox" id="modeToggle">
           <span class="track"></span>
           <span class="thumb"></span>
         </label>
       </div>
-      <div class="menu-credits">
-        Easy Compressor v1.0<br>Made by @quantosh
+      <hr>
+      <div class="text-center">
+        <p>Created by <a href="https://github.com/quantosh" target="_blank" rel="noopener" class="about-link">@quantosh</a></p>
       </div>
+      <button class="about-btn" id="settingsCloseBtn">Close</button>
     </div>
   </div>
 

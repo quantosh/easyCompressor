@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const reductionBadge = document.getElementById('reductionBadge');
     const gearBtn = document.getElementById('gearBtn');
     const settingsMenu = document.getElementById('settingsMenu');
+    const settingsCloseBtn = document.getElementById('settingsCloseBtn');
     const modeToggle = document.getElementById('modeToggle');
 
     const enableBtnBasic = document.getElementById('enableBtnBasic');
@@ -87,6 +88,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Gear → popover
     gearBtn.addEventListener('click', () => {
         settingsMenu.classList.toggle('visible');
+    });
+
+    settingsCloseBtn.addEventListener('click', () => {
+        settingsMenu.classList.remove('visible');
     });
 
     // Mode toggle
