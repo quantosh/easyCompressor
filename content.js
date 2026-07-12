@@ -1,7 +1,9 @@
-// content.js
 let audioContext = null;
 let source = null;
 let compressor = null;
+let eqBass = null;
+let eqMid = null;
+let eqTreble = null;
 let analyser = null;
 let gainNode = null;
 let mediaElement = null;
@@ -23,6 +25,28 @@ function initializeAudio(element) {
             source = audioContext.createMediaElementSource(element);
         }
 
+        if (!eqBass) {
+            eqBass = audioContext.createBiquadFilter();
+            eqBass.type = 'lowshelf';
+            eqBass.frequency.value = 250;
+            eqBass.gain.value = 0;
+        }
+
+        if (!eqMid) {
+            eqMid = audioContext.createBiquadFilter();
+            eqMid.type = 'peaking';
+            eqMid.frequency.value = 1000;
+            eqMid.Q.value = 0.7;
+            eqMid.gain.value = 0;
+        }
+
+        if (!eqTreble) {
+            eqTreble = audioContext.createBiquadFilter();
+            eqTreble.type = 'highshelf';
+            eqTreble.frequency.value = 4000;
+            eqTreble.gain.value = 0;
+        }
+
         if (!compressor) {
             compressor = audioContext.createDynamicsCompressor();
             compressor.threshold.value = -30;
@@ -42,7 +66,6 @@ function initializeAudio(element) {
             gainNode.gain.value = 1.0;
         }
 
-        // Reconectar nodos según el estado del compresor
         reconnectAudioGraph();
         startMeter();
     } catch (error) {
@@ -53,25 +76,29 @@ function initializeAudio(element) {
 function reconnectAudioGraph() {
     if (!source || !analyser || !gainNode) return;
     try {
-        // Desconecta todo de gainNode primero
         try { gainNode.disconnect(); } catch (e) {}
         try { analyser.disconnect(); } catch (e) {}
         try { compressor.disconnect(); } catch (e) {}
+        try { eqTreble.disconnect(); } catch (e) {}
+        try { eqMid.disconnect(); } catch (e) {}
+        try { eqBass.disconnect(); } catch (e) {}
         try { source.disconnect(); } catch (e) {}
 
+        // source → eqBass → eqMid → eqTreble → [compressor] → analyser → gainNode → destination
+        try { source.connect(eqBass); } catch (e) {}
+        try { eqBass.connect(eqMid); } catch (e) {}
+        try { eqMid.connect(eqTreble); } catch (e) {}
+
         if (isCompressorEnabled) {
-            // source -> compressor -> analyser -> gainNode -> destination
-            try { source.connect(compressor); } catch (e) {}
+            try { eqTreble.connect(compressor); } catch (e) {}
             try { compressor.connect(analyser); } catch (e) {}
-            try { analyser.connect(gainNode); } catch (e) {}
         } else {
-            // source -> analyser -> gainNode -> destination
-            try { source.connect(analyser); } catch (e) {}
-            try { analyser.connect(gainNode); } catch (e) {}
+            try { eqTreble.connect(analyser); } catch (e) {}
         }
+
+        try { analyser.connect(gainNode); } catch (e) {}
         try { gainNode.connect(audioContext.destination); } catch (e) {}
     } catch (error) {
-        // Puede fallar si ya están desconectados
     }
 }
 
@@ -84,6 +111,8 @@ function updateCompressor(state) {
             clearTimeout(pendingUpdate);
             pendingUpdate = null;
         }
+
+        applyEQ(state.eq);
 
         const now = audioContext.currentTime;
         gainNode.gain.cancelScheduledValues(now);
@@ -116,18 +145,25 @@ function updateCompressor(state) {
     }
 }
 
+function applyEQ(eq) {
+    if (!eqBass || !eqMid || !eqTreble) return;
+    if (eq) {
+        if (eq.bass !== undefined) eqBass.gain.value = parseFloat(eq.bass);
+        if (eq.mid !== undefined) eqMid.gain.value = parseFloat(eq.mid);
+        if (eq.treble !== undefined) eqTreble.gain.value = parseFloat(eq.treble);
+    }
+}
+
 function setupAudioProcessing() {
     const mediaElements = document.querySelectorAll('video, audio');
     if (mediaElements.length === 0) return;
 
-    // Solo procesamos el primer elemento multimedia encontrado
     const element = mediaElements[0];
     if (!element.src && !element.querySelector('source')) return;
 
     initializeAudio(element);
 }
 
-// Listener para mensajes desde el popup
 chrome.runtime.onMessage.addListener((request) => {
     if (request.action === 'updateState') {
         setupAudioProcessing();
@@ -135,10 +171,9 @@ chrome.runtime.onMessage.addListener((request) => {
     }
 });
 
-// Medidor de nivel de audio y envío al popup
 function startMeter() {
     if (!analyser) return;
-    if (animationFrameId) return; // Ya corriendo
+    if (animationFrameId) return;
     function updateMeter() {
         const dataArray = new Uint8Array(analyser.frequencyBinCount);
         analyser.getByteTimeDomainData(dataArray);
@@ -158,7 +193,6 @@ function startMeter() {
     updateMeter();
 }
 
-// Intenta inicializar al cargar la página
 function trySetup() {
     if (!audioContext) {
         setupAudioProcessing();
@@ -167,7 +201,6 @@ function trySetup() {
 
 setTimeout(trySetup, 1000);
 
-// Observa cambios en el DOM para detectar elementos multimedia agregados dinámicamente
 const setupObserver = new MutationObserver(() => {
     if (!audioContext && document.querySelector('video, audio')) {
         setupAudioProcessing();

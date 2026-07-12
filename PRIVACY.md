@@ -10,7 +10,7 @@ Easy Compressor applies a dynamic audio compressor to media elements (`<video>` 
 
 - **No data collection**: The extension does not collect, record, or send any information.
 - **No network requests**: All audio processing happens locally in your browser. No data is sent to any server.
-- **No storage**: The extension does not use `chrome.storage` or any other form of persistent storage.
+- **Local storage only**: The extension uses `chrome.storage.local` solely to persist your EQ and compressor settings between popup sessions. This data never leaves your browser.
 - **No analytics**: No analytics, tracking, or telemetry of any kind is implemented.
 - **Host permissions**: The `activeTab` and `<all_urls>` permissions are used solely to inject the content script into the current tab so the compressor can access `<video>`/`<audio>` elements. This access is temporary and limited to the active tab while the extension is being used.
 

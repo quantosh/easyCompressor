@@ -1,3 +1,10 @@
+const EQ_PRESETS = {
+    flat:       { bass: 0,  mid: 0,  treble: 0 },
+    'bass-boost': { bass: 6,  mid: 0,  treble: 2 },
+    voice:      { bass: -3, mid: 5,  treble: 3 },
+    loudness:   { bass: 4,  mid: 0,  treble: 4 }
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     const compressButton = document.getElementById('compressButton');
     const settingsButton = document.getElementById('settingsButton');
@@ -10,6 +17,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusDot = document.getElementById('statusDot');
     const reductionBadge = document.getElementById('reductionBadge');
 
+    const eqBass = document.getElementById('eq-bass');
+    const eqMid = document.getElementById('eq-mid');
+    const eqTreble = document.getElementById('eq-treble');
+    const eqBassValue = document.getElementById('eq-bass-value');
+    const eqMidValue = document.getElementById('eq-mid-value');
+    const eqTrebleValue = document.getElementById('eq-treble-value');
+    const presetBtns = document.querySelectorAll('[data-preset]');
+
     let meterContext = null;
     if (meterCanvas) {
         meterCanvas.width = meterCanvas.clientWidth || 268;
@@ -18,6 +33,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     let isCompressorActive = false;
+    let currentPreset = 'flat';
+    let isCustom = false;
 
     chrome.runtime.onMessage.addListener((message) => {
         if (message.action === "audioLevel") {
@@ -47,7 +64,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function drawMeter(level, reductionDb) {
         if (!meterCanvas || !meterContext) return;
-
         const w = meterCanvas.width;
         const h = meterCanvas.height;
 
@@ -78,7 +94,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         meterContext.clearRect(0, 0, w, h);
-
         const bgGrad = meterContext.createLinearGradient(0, 0, w, 0);
         bgGrad.addColorStop(0, '#68d391');
         bgGrad.addColorStop(0.5, '#ecc94b');
@@ -108,6 +123,52 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function selectPreset(name) {
+        currentPreset = name;
+        isCustom = false;
+        presetBtns.forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.preset === name);
+        });
+        const vals = EQ_PRESETS[name];
+        if (vals) {
+            setEQValues(vals.bass, vals.mid, vals.treble);
+            sendEQ();
+        }
+    }
+
+    function setEQValues(bass, mid, treble) {
+        if (eqBass) eqBass.value = bass;
+        if (eqMid) eqMid.value = mid;
+        if (eqTreble) eqTreble.value = treble;
+        if (eqBassValue) eqBassValue.textContent = `${bass} dB`;
+        if (eqMidValue) eqMidValue.textContent = `${mid} dB`;
+        if (eqTrebleValue) eqTrebleValue.textContent = `${treble} dB`;
+    }
+
+    function sendEQ() {
+        chrome.runtime.sendMessage({
+            action: "updateEQ",
+            bass: eqBass.value,
+            mid: eqMid.value,
+            treble: eqTreble.value
+        });
+    }
+
+    function onEQSliderChange() {
+        if (!isCustom) {
+            isCustom = true;
+            presetBtns.forEach(btn => btn.classList.remove('active'));
+            currentPreset = 'custom';
+        }
+        const b = parseInt(eqBass.value);
+        const m = parseInt(eqMid.value);
+        const t = parseInt(eqTreble.value);
+        if (eqBassValue) eqBassValue.textContent = `${b} dB`;
+        if (eqMidValue) eqMidValue.textContent = `${m} dB`;
+        if (eqTrebleValue) eqTrebleValue.textContent = `${t} dB`;
+        sendEQ();
+    }
+
     function init() {
         chrome.runtime.sendMessage({ action: "getState" }, (state) => {
             if (state) {
@@ -117,6 +178,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (thresholdValue) thresholdValue.textContent = `${state.threshold} dB`;
                 if (ratioValue) ratioValue.textContent = `${state.ratio}:1`;
                 updateUI(state);
+
+                if (state.eq) {
+                    const eq = state.eq;
+                    setEQValues(eq.bass, eq.mid, eq.treble);
+
+                    let found = false;
+                    for (const [name, vals] of Object.entries(EQ_PRESETS)) {
+                        if (vals.bass === eq.bass && vals.mid === eq.mid && vals.treble === eq.treble) {
+                            selectPreset(name);
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        isCustom = true;
+                        presetBtns.forEach(btn => btn.classList.remove('active'));
+                    }
+                }
             }
         });
     }
@@ -139,6 +218,14 @@ document.addEventListener('DOMContentLoaded', () => {
             advancedControls.classList.toggle('visible');
         });
     }
+
+    presetBtns.forEach(btn => {
+        btn.addEventListener('click', () => selectPreset(btn.dataset.preset));
+    });
+
+    if (eqBass) eqBass.addEventListener('input', onEQSliderChange);
+    if (eqMid) eqMid.addEventListener('input', onEQSliderChange);
+    if (eqTreble) eqTreble.addEventListener('input', onEQSliderChange);
 
     function sendSettingsUpdate() {
         chrome.runtime.sendMessage({

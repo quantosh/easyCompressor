@@ -1,15 +1,31 @@
-// background.js
-// Gestiona el estado del compresor para la extensión
-
 let compressorState = {
     active: false,
     threshold: -30,
     ratio: 8
 };
 
+let eqState = {
+    bass: 0,
+    mid: 0,
+    treble: 0
+};
 
+function saveState() {
+    chrome.storage.local.set({
+        compressor: compressorState,
+        eq: eqState
+    }).catch(() => {});
+}
 
-// Escucha los mensajes del popup y content script
+function loadState() {
+    chrome.storage.local.get(['compressor', 'eq'], (result) => {
+        if (result.compressor) compressorState = { ...compressorState, ...result.compressor };
+        if (result.eq) eqState = { ...eqState, ...result.eq };
+    });
+}
+
+loadState();
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "toggleCompressor") {
         compressorState = {
@@ -18,6 +34,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             threshold: request.threshold,
             ratio: request.ratio
         };
+        saveState();
         updateActiveTab();
     } else if (request.action === "updateSettings") {
         compressorState = {
@@ -25,23 +42,31 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             threshold: request.threshold,
             ratio: request.ratio
         };
+        saveState();
+        updateActiveTab();
+    } else if (request.action === "updateEQ") {
+        eqState = {
+            bass: parseFloat(request.bass),
+            mid: parseFloat(request.mid),
+            treble: parseFloat(request.treble)
+        };
+        saveState();
         updateActiveTab();
     } else if (request.action === "getState") {
-        sendResponse(compressorState);
+        sendResponse({ ...compressorState, eq: eqState });
         return true;
     } else if (request.action === "audioLevel") {
-        // Reenviar el nivel de audio al popup (si está abierto)
         chrome.runtime.sendMessage({ action: "audioLevel", level: request.level, reduction: request.reduction }).catch(() => {});
     }
 });
 
-// Función para enviar la configuración a la pestaña activa
 function updateActiveTab() {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         if (tabs[0]) {
             chrome.tabs.sendMessage(tabs[0].id, {
                 action: "updateState",
-                ...compressorState
+                ...compressorState,
+                eq: eqState
             }).catch(err => console.error("Error al enviar mensaje a la pestaña activa:", err));
         }
     });
