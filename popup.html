@@ -14,15 +14,49 @@ body{font-family:system-ui,-apple-system,sans-serif;width:300px;padding:.625rem;
 .status-dot{width:7px;height:7px;border-radius:50%;background:var(--dot-inactive);transition:background .3s,box-shadow .3s;flex-shrink:0}
 .status-dot.active{background:var(--success);box-shadow:0 0 6px color-mix(in srgb,var(--success) 60%,transparent)}
 .header h1{font-size:.8125rem;font-weight:700;letter-spacing:-.01em}
+.header-right{display:flex;align-items:center;gap:4px}
 .header-version{font-size:.65rem;color:var(--text-muted)}
-.vu-wrap{height:24px;background:var(--surface);border-radius:5px;overflow:hidden;border:1px solid var(--border)}
+.gear-btn{background:none;border:none;font-size:.875rem;cursor:pointer;padding:2px;color:var(--text-secondary);transition:color .2s;line-height:1}
+.gear-btn:hover{color:var(--text)}
+.vu-wrap{height:24px;background:var(--surface);border-radius:5px;overflow:hidden;border:1px solid var(--border);margin-bottom:2px}
 #vu{display:block;width:100%;height:100%}
-.btn-row{display:flex;gap:6px}
-.btn-primary{flex:1;padding:.4rem .75rem;font-size:.8rem;font-weight:600;font-family:inherit;color:#fff;background:var(--accent);border:1px solid var(--accent);border-radius:6px;cursor:pointer;transition:background .2s,border-color .2s,transform .1s}
+.meter-labels{display:flex;justify-content:space-between;font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
+.reduction-badge{visibility:hidden;display:flex;align-items:center;gap:.3rem;font-size:.7rem;color:var(--danger);font-weight:600}
+.reduction-badge.visible{visibility:visible}
+.reduction-badge::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--danger);flex-shrink:0}
+
+/* Simple view */
+.view-simple{display:flex;flex-direction:column;gap:.5rem}
+.view-simple.hidden{display:none}
+.toggle-large{display:flex;flex-direction:column;align-items:center;gap:4px}
+.toggle-large-row{display:flex;align-items:center;gap:8px}
+.toggle-large-labels{display:flex;justify-content:space-between;width:100%;font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.toggle-switch{position:relative;width:44px;height:24px;flex-shrink:0;cursor:pointer}
+.toggle-switch input{position:absolute;opacity:0;width:0;height:0}
+.toggle-track{position:absolute;inset:0;background:var(--slider-track);border-radius:12px;transition:.25s}
+.toggle-thumb{position:absolute;width:20px;height:20px;top:2px;left:2px;background:var(--text);border-radius:50%;transition:.25s}
+.toggle-switch input:checked+.toggle-track{background:var(--success)}
+.toggle-switch input:checked~.toggle-thumb{left:22px}
+.toggle-state-text{font-size:.75rem;font-weight:600;color:var(--text-secondary);min-width:30px;text-align:center}
+.intensity-wrap{display:flex;flex-direction:column;gap:4px}
+.intensity-header{display:flex;justify-content:space-between;font-size:.675rem;color:var(--text-secondary)}
+.intensity-header .val{font-weight:600;color:var(--text)}
+.intensity-wrap input[type="range"]{width:100%;height:5px;-webkit-appearance:none;appearance:none;background:var(--slider-track);border-radius:3px;outline:none;cursor:pointer}
+.intensity-wrap input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;background:var(--accent);border-radius:50%;border:2px solid var(--slider-thumb-border);cursor:pointer}
+.intensity-wrap input[type="range"]::-moz-range-thumb{width:14px;height:14px;background:var(--accent);border-radius:50%;border:2px solid var(--slider-thumb-border);cursor:pointer}
+.intensity-ticks{display:flex;justify-content:space-between;font-size:.6rem;color:var(--text-muted)}
+.tooltip-box{padding:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;font-size:.7rem;color:var(--text-secondary);line-height:1.4;text-align:center}
+.tooltip-box.active{color:var(--success);border-color:var(--success)}
+
+/* Advanced view */
+.view-advanced{display:none;flex-direction:column;gap:.375rem}
+.view-advanced.visible{display:flex}
+.btn-primary{width:100%;padding:.4rem .75rem;font-size:.8rem;font-weight:600;font-family:inherit;color:#fff;background:var(--accent);border:1px solid var(--accent);border-radius:6px;cursor:pointer;transition:background .2s,border-color .2s,transform .1s}
 .btn-primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
 .btn-primary:active{transform:scale(.98)}
 .btn-primary.active{background:transparent;border-color:var(--success);color:var(--success)}
 .btn-primary.active:hover{background:color-mix(in srgb,var(--success) 10%,transparent)}
+.btn-row{display:flex;gap:6px}
 .btn-toggle{padding:.4rem .65rem;font-size:.75rem;font-weight:600;font-family:inherit;color:var(--text-secondary);background:transparent;border:1px solid var(--border);border-radius:6px;cursor:pointer;transition:color .2s,border-color .2s,background .2s;white-space:nowrap}
 .btn-toggle:hover{color:var(--text);border-color:var(--border-hover)}
 .btn-toggle.on{color:var(--accent);border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
@@ -44,11 +78,6 @@ input[type="range"]::-moz-range-thumb{width:12px;height:12px;background:var(--ac
 .preset-btn.active{color:var(--accent);border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
 .eq-section{display:block}
 .eq-section.hidden{display:none}
-.reduction-badge{visibility:hidden;display:flex;align-items:center;gap:.3rem;font-size:.7rem;color:var(--danger);font-weight:600}
-.reduction-badge.visible{visibility:visible}
-.reduction-badge::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--danger);flex-shrink:0}
-.meter-section{display:flex;flex-direction:column;gap:2px}
-.meter-labels{display:flex;justify-content:space-between;font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
 </style>
 </head>
 <body>
@@ -58,71 +87,107 @@ input[type="range"]::-moz-range-thumb{width:12px;height:12px;background:var(--ac
       <span class="status-dot" id="statusDot"></span>
       <h1>Easy Compressor</h1>
     </div>
-    <span class="header-version">v1.0</span>
-  </div>
-
-  <div class="meter-section">
-    <div class="meter-labels">
-      <span>Level</span>
-      <span class="reduction-badge" id="reductionBadge">Gain reduction</span>
-    </div>
-    <div class="vu-wrap"><canvas id="vu" width="278" height="24"></canvas></div>
-  </div>
-
-  <div class="btn-row">
-    <button id="compressBtn" class="btn-primary">Enable Compressor</button>
-    <button id="eqToggle" class="btn-toggle on">EQ</button>
-  </div>
-
-  <div class="panel">
-    <div class="panel-title">Compressor</div>
-    <div class="s-group" id="compSliders">
-      <div class="control-group">
-        <div class="slider-header"><label>Threshold</label><span class="val" id="threshold-val">-30 dB</span></div>
-        <input type="range" id="threshold-sl" min="-60" max="0" value="-30" step="1">
-      </div>
-      <div class="control-group">
-        <div class="slider-header"><label>Ratio</label><span class="val" id="ratio-val">8:1</span></div>
-        <input type="range" id="ratio-sl" min="1" max="20" value="8" step="1">
-      </div>
-      <div class="control-group">
-        <div class="slider-header"><label>Attack</label><span class="val" id="attack-val">3 ms</span></div>
-        <input type="range" id="attack-sl" min="0" max="200" value="3" step="1">
-      </div>
-      <div class="control-group">
-        <div class="slider-header"><label>Release</label><span class="val" id="release-val">250 ms</span></div>
-        <input type="range" id="release-sl" min="10" max="1000" value="250" step="10">
-      </div>
-      <div class="control-group">
-        <div class="slider-header"><label>Gain</label><span class="val" id="gain-val">0 dB</span></div>
-        <input type="range" id="gain-sl" min="0" max="24" value="0" step="1">
-      </div>
+    <div class="header-right">
+      <span class="header-version">v1.0</span>
+      <button class="gear-btn" id="gearBtn" title="Toggle mode">⚙</button>
     </div>
   </div>
 
-  <div class="panel eq-section" id="eqSection">
-    <div class="panel-header">
-      <span class="panel-title">Equalizer</span>
-      <button id="eqEnableBtn" class="btn-toggle on">ON</button>
-    </div>
-    <div class="presets" id="eqPresets">
-      <button class="preset-btn active" data-p="flat">Flat</button>
-      <button class="preset-btn" data-p="bass">Bass</button>
-      <button class="preset-btn" data-p="voice">Voice</button>
-      <button class="preset-btn" data-p="loud">Loud</button>
-    </div>
-    <div class="s-group">
-      <div class="control-group">
-        <div class="slider-header"><label>Bass</label><span class="val" id="eq-bass-val">0 dB</span></div>
-        <input type="range" id="eq-bass-sl" min="-12" max="12" value="0" step="1">
+  <div class="meter-labels">
+    <span>Level</span>
+    <span class="reduction-badge" id="reductionBadge">Gain reduction</span>
+  </div>
+  <div class="vu-wrap"><canvas id="vu" width="278" height="24"></canvas></div>
+
+  <!-- View: Simple -->
+  <div class="view-simple" id="viewSimple">
+    <div class="toggle-large">
+      <div class="toggle-large-row">
+        <span class="toggle-state-text" id="simpleStateOff">OFF</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="simpleToggle">
+          <span class="toggle-track"></span>
+          <span class="toggle-thumb"></span>
+        </label>
+        <span class="toggle-state-text" id="simpleStateOn">ON</span>
       </div>
-      <div class="control-group">
-        <div class="slider-header"><label>Mid</label><span class="val" id="eq-mid-val">0 dB</span></div>
-        <input type="range" id="eq-mid-sl" min="-12" max="12" value="0" step="1">
+    </div>
+
+    <div class="intensity-wrap">
+      <div class="intensity-header">
+        <span>Intensity</span>
+        <span class="val" id="intensityVal">Light</span>
       </div>
-      <div class="control-group">
-        <div class="slider-header"><label>Treble</label><span class="val" id="eq-treble-val">0 dB</span></div>
-        <input type="range" id="eq-treble-sl" min="-12" max="12" value="0" step="1">
+      <input type="range" id="intensitySlider" min="1" max="3" step="1" value="2">
+      <div class="intensity-ticks">
+        <span>Light</span>
+        <span>Medium</span>
+        <span>Heavy</span>
+      </div>
+    </div>
+
+    <div class="tooltip-box" id="tooltipBox">
+      Enable audio compression to level loud and quiet parts automatically
+    </div>
+  </div>
+
+  <!-- View: Advanced -->
+  <div class="view-advanced" id="viewAdvanced">
+    <div class="btn-row">
+      <button id="compressBtn" class="btn-primary">Enable Compressor</button>
+      <button id="eqToggle" class="btn-toggle on">EQ</button>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Compressor</div>
+      <div class="s-group">
+        <div class="control-group">
+          <div class="slider-header"><label>Threshold</label><span class="val" id="threshold-val">-30 dB</span></div>
+          <input type="range" id="threshold-sl" min="-60" max="0" value="-30" step="1">
+        </div>
+        <div class="control-group">
+          <div class="slider-header"><label>Ratio</label><span class="val" id="ratio-val">8:1</span></div>
+          <input type="range" id="ratio-sl" min="1" max="20" value="8" step="1">
+        </div>
+        <div class="control-group">
+          <div class="slider-header"><label>Attack</label><span class="val" id="attack-val">3 ms</span></div>
+          <input type="range" id="attack-sl" min="0" max="200" value="3" step="1">
+        </div>
+        <div class="control-group">
+          <div class="slider-header"><label>Release</label><span class="val" id="release-val">250 ms</span></div>
+          <input type="range" id="release-sl" min="10" max="1000" value="250" step="10">
+        </div>
+        <div class="control-group">
+          <div class="slider-header"><label>Gain</label><span class="val" id="gain-val">0 dB</span></div>
+          <input type="range" id="gain-sl" min="0" max="24" value="0" step="1">
+        </div>
+      </div>
+    </div>
+
+    <div class="panel eq-section" id="eqSection">
+      <div class="panel-header">
+        <span class="panel-title">Equalizer</span>
+        <button id="eqEnableBtn" class="btn-toggle on">ON</button>
+      </div>
+      <div class="presets" id="eqPresets">
+        <button class="preset-btn active" data-p="flat">Flat</button>
+        <button class="preset-btn" data-p="bass">Bass</button>
+        <button class="preset-btn" data-p="voice">Voice</button>
+        <button class="preset-btn" data-p="loud">Loud</button>
+      </div>
+      <div class="s-group">
+        <div class="control-group">
+          <div class="slider-header"><label>Bass</label><span class="val" id="eq-bass-val">0 dB</span></div>
+          <input type="range" id="eq-bass-sl" min="-12" max="12" value="0" step="1">
+        </div>
+        <div class="control-group">
+          <div class="slider-header"><label>Mid</label><span class="val" id="eq-mid-val">0 dB</span></div>
+          <input type="range" id="eq-mid-sl" min="-12" max="12" value="0" step="1">
+        </div>
+        <div class="control-group">
+          <div class="slider-header"><label>Treble</label><span class="val" id="eq-treble-val">0 dB</span></div>
+          <input type="range" id="eq-treble-sl" min="-12" max="12" value="0" step="1">
+        </div>
       </div>
     </div>
   </div>

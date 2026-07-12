@@ -15,15 +15,18 @@ let eqState = {
 };
 
 function saveState() {
-    chrome.storage.local.set({ compressor: compressorState, eq: eqState }).catch(() => {});
+    chrome.storage.local.set({ compressor: compressorState, eq: eqState, mode: modePref }).catch(() => {});
 }
 
 function loadState() {
-    chrome.storage.local.get(['compressor', 'eq'], (result) => {
+    chrome.storage.local.get(['compressor', 'eq', 'mode'], (result) => {
         if (result.compressor) compressorState = { ...compressorState, ...result.compressor };
         if (result.eq) eqState = { ...eqState, ...result.eq };
+        if (result.mode) modePref = result.mode;
     });
 }
+
+let modePref = 'simple';
 
 loadState();
 
@@ -42,8 +45,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         saveState();
         updateActiveTab();
     } else if (request.action === "getState") {
-        sendResponse({ ...compressorState, eq: eqState });
+        sendResponse({ ...compressorState, eq: eqState, mode: modePref });
         return true;
+    } else if (request.action === "setMode") {
+        modePref = request.mode;
+        chrome.storage.local.set({ mode: modePref }).catch(() => {});
     } else if (request.action === "audioLevel") {
         chrome.runtime.sendMessage({ action: "audioLevel", level: request.level, reduction: request.reduction }).catch(() => {});
     }
