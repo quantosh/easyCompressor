@@ -27,7 +27,7 @@ body{font-family:system-ui,-apple-system,sans-serif;width:300px;padding:.625rem;
 .menu-row p{font-size:.75rem;color:var(--text-secondary)}
 
 /* VU METER */
-.meter-labels{display:flex;justify-content:space-between;font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
+.meter-labels{display:flex;justify-content:space-between;font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:0}
 .vu-wrap{height:34px;background:var(--surface);border-radius:5px;overflow:hidden;border:1px solid var(--border)}
 #vu{display:block;width:100%;height:100%}
 .reduction-badge{visibility:hidden;display:flex;align-items:center;gap:.3rem;font-size:.7rem;color:var(--danger);font-weight:600}
