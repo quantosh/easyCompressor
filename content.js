@@ -165,11 +165,11 @@ function setupAudioProcessing() {
     const mediaElements = document.querySelectorAll('video, audio');
     if (mediaElements.length === 0) return;
     const element = mediaElements[0];
-    if (!element.src && !element.querySelector('source')) {
-        element.addEventListener('loadedmetadata', () => initializeAudio(element), { once: true });
+    if (element.src || element.querySelector('source') || element.readyState > 0) {
+        initializeAudio(element);
         return;
     }
-    initializeAudio(element);
+    element.addEventListener('loadedmetadata', () => initializeAudio(element), { once: true });
 }
 
 chrome.runtime.onMessage.addListener(async (request) => {
