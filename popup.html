@@ -21,12 +21,17 @@ body{font-family:system-ui,-apple-system,sans-serif;width:300px;padding:.625rem;
 .gear-btn{background:none;border:none;font-size:.875rem;cursor:pointer;padding:2px;color:var(--text-secondary);transition:color .2s;line-height:1}
 .gear-btn:hover{color:var(--text)}
 
-/* ============ SETTINGS MENU ============ */
-.settings-menu{display:none;flex-direction:column;gap:.5rem;padding:.625rem .75rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;position:relative;z-index:2}
-.settings-menu.visible{display:flex}
+/* ============ VIEW SWITCHING ============ */
+.view-main{display:flex;flex-direction:column;gap:.5rem}
+.view-main.hidden{display:none}
+.view-settings{display:none;flex-direction:column;gap:.5rem}
+.view-settings.visible{display:flex}
+.view-header{display:flex;align-items:center;gap:.5rem}
+.view-header .back-btn{background:none;border:none;font-size:1rem;cursor:pointer;padding:0;color:var(--accent);line-height:1;transition:color .2s}
+.view-header .back-btn:hover{color:var(--accent-hover)}
+.view-header span{font-size:.8rem;font-weight:600;color:var(--text)}
 .menu-row{display:flex;align-items:center;justify-content:space-between}
 .menu-row p{font-size:.75rem;color:light-dark(#475569,#94a3b8)}
-.menu-credits{font-size:.65rem;color:var(--text-muted);text-align:center;line-height:1.5;padding-top:4px;border-top:1px solid var(--border)}
 
 /* ============ VU METER ============ */
 .meter-labels{display:flex;justify-content:space-between;font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
@@ -59,8 +64,8 @@ body{font-family:system-ui,-apple-system,sans-serif;width:300px;padding:.625rem;
 .simple-status.on{color:var(--success);font-weight:600}
 
 /* ============ ADVANCED MODE ============ */
-.btn-row{display:flex;gap:6px;margin-top:2px}
-.btn-primary{flex:1;padding:.4rem .75rem;font-size:.8rem;font-weight:600;font-family:inherit;color:var(--success);background:transparent;border:1px solid var(--success);border-radius:6px;cursor:pointer;transition:background .2s,border-color .2s,transform .1s}
+.btn-row{display:flex;gap:6px}
+.btn-primary{flex:1;padding:.5rem .75rem;font-size:.8rem;font-weight:600;font-family:inherit;color:var(--success);background:transparent;border:1px solid var(--success);border-radius:6px;cursor:pointer;transition:background .2s,border-color .2s,transform .1s}
 .btn-primary:hover{background:color-mix(in srgb,var(--success) 10%,transparent)}
 .btn-primary:active{transform:scale(.98)}
 .btn-primary.active{color:var(--danger);border-color:var(--danger);background:transparent}
@@ -71,7 +76,7 @@ body{font-family:system-ui,-apple-system,sans-serif;width:300px;padding:.625rem;
 .panel{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:.625rem .75rem}
 .panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
 .panel-title{font-size:.6rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em}
-.control-group{display:flex;flex-direction:column;gap:6px;margin-bottom:1px}
+.control-group{display:flex;flex-direction:column;gap:6px}
 .control-group:last-child{margin-bottom:0}
 .slider-header{display:flex;justify-content:space-between;align-items:center}
 .slider-header label{font-size:.7rem;color:var(--text-secondary)}
@@ -103,10 +108,7 @@ input[type="range"]::-moz-range-thumb{width:12px;height:12px;background:var(--ac
 .toggle-md input:checked+.track{background:var(--accent)}
 .toggle-md input:checked~.thumb{left:18px}
 
-/* Settings popover (BusApp style) */
-.settings-menu{display:none;flex-direction:column;position:relative;z-index:2}
-.settings-menu.visible{display:flex}
-.about-card{background:light-dark(#fff,#1e293b);border:1px solid light-dark(#e2e8f0,#334155);border-radius:16px;padding:1.25rem;box-shadow:0 10px 25px rgba(0,0,0,.2)}
+/* Settings card (BusApp style) */
 .about-card .text-center{text-align:center}
 .about-card .about-icon{width:32px;height:32px;margin:0 auto 8px;display:block}
 .about-card h2{font-size:1rem;font-weight:700;color:light-dark(#1e293b,#f1f5f9)}
@@ -115,7 +117,7 @@ input[type="range"]::-moz-range-thumb{width:12px;height:12px;background:var(--ac
 .about-card p{font-size:.7rem;color:light-dark(#475569,#94a3b8);line-height:1.5}
 .about-card .about-link{color:var(--success);font-weight:600;text-decoration:none}
 .about-card .about-link:hover{text-decoration:underline}
-.about-card .about-btn{width:100%;margin-top:12px;background:var(--success);color:#fff;padding:8px;border:none;border-radius:12px;font-size:.8rem;font-weight:600;font-family:inherit;cursor:pointer;transition:background .2s}
+.about-card .about-btn{width:100%;margin-top:12px;background:var(--success);color:#fff;padding:8px;border:none;border-radius:12px;font-size:.8rem;font-weight:600;font-family:inherit;cursor:pointer;transition:filter .2s}
 .about-card .about-btn:hover{filter:brightness(1.1)}
 </style>
 </head>
@@ -132,8 +134,12 @@ input[type="range"]::-moz-range-thumb{width:12px;height:12px;background:var(--ac
     </div>
   </div>
 
-  <!-- SETTINGS POPOVER (BusApp style) -->
-  <div class="settings-menu" id="settingsMenu">
+  <!-- SETTINGS VIEW -->
+  <div class="view-settings" id="viewSettings">
+    <div class="view-header">
+      <button class="back-btn" id="backBtn">←</button>
+      <span>Settings</span>
+    </div>
     <div class="about-card">
       <div class="text-center">
         <svg class="about-icon" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
@@ -157,8 +163,8 @@ input[type="range"]::-moz-range-thumb{width:12px;height:12px;background:var(--ac
     </div>
   </div>
 
-  <!-- MAIN CONTENT -->
-  <div id="mainContent">
+  <!-- MAIN VIEW -->
+  <div class="view-main" id="viewMain">
     <div class="meter-labels">
       <span>Level</span>
       <span class="reduction-badge" id="reductionBadge">Gain reduction</span>

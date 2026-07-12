@@ -20,7 +20,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusDot = document.getElementById('statusDot');
     const reductionBadge = document.getElementById('reductionBadge');
     const gearBtn = document.getElementById('gearBtn');
-    const settingsMenu = document.getElementById('settingsMenu');
+    const viewMain = document.getElementById('viewMain');
+    const viewSettings = document.getElementById('viewSettings');
+    const backBtn = document.getElementById('backBtn');
     const settingsCloseBtn = document.getElementById('settingsCloseBtn');
     const modeToggle = document.getElementById('modeToggle');
 
@@ -85,14 +87,19 @@ document.addEventListener('DOMContentLoaded', () => {
     enableBtnBasic.addEventListener('click', () => doEnable(!compressorOn));
     enableBtnAdv.addEventListener('click', () => doEnable(!compressorOn));
 
-    // Gear → popover
+    // Gear → Settings view
     gearBtn.addEventListener('click', () => {
-        settingsMenu.classList.toggle('visible');
+        viewMain.classList.add('hidden');
+        viewSettings.classList.add('visible');
     });
 
-    settingsCloseBtn.addEventListener('click', () => {
-        settingsMenu.classList.remove('visible');
-    });
+    backBtn.addEventListener('click', closeSettings);
+    settingsCloseBtn.addEventListener('click', closeSettings);
+
+    function closeSettings() {
+        viewSettings.classList.remove('visible');
+        viewMain.classList.remove('hidden');
+    }
 
     // Mode toggle
     modeToggle.addEventListener('change', () => {
