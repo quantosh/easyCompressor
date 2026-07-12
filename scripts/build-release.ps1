@@ -20,25 +20,32 @@ if ($target -eq "firefox") {
     Copy-Item $firefoxManifest (Join-Path $repoRoot "manifest.json") -Force
 }
 
-$filesToInclude = @(
-    "manifest.json",
-    "background.js",
-    "content.js",
-    "popup.html",
-    "popup.js"
-)
-
-$imagesPath = Join-Path $repoRoot "images"
-if (Test-Path $imagesPath) {
-    $filesToInclude += Get-ChildItem -Path $imagesPath -Filter "*.png" | ForEach-Object { "images/$($_.Name)" }
-}
-
 if (Test-Path $destinationPath) {
     Remove-Item $destinationPath
 }
 
-$fullPaths = $filesToInclude | ForEach-Object { Join-Path $repoRoot $_ }
-Compress-Archive -Path $fullPaths -DestinationPath $destinationPath -CompressionLevel Optimal
+# Construir el ZIP desde un staging dir para preservar subdirectorios
+$stagingDir = Join-Path $repoRoot "_staging"
+New-Item -ItemType Directory -Path $stagingDir -Force | Out-Null
+try {
+    Copy-Item (Join-Path $repoRoot "manifest.json") $stagingDir
+    Copy-Item (Join-Path $repoRoot "background.js") $stagingDir
+    Copy-Item (Join-Path $repoRoot "content.js") $stagingDir
+    Copy-Item (Join-Path $repoRoot "popup.html") $stagingDir
+    Copy-Item (Join-Path $repoRoot "popup.js") $stagingDir
+
+    $imagesPath = Join-Path $repoRoot "images"
+    if (Test-Path $imagesPath) {
+        $stagingImages = Join-Path $stagingDir "images"
+        New-Item -ItemType Directory -Path $stagingImages -Force | Out-Null
+        Copy-Item (Join-Path $imagesPath "*.png") $stagingImages
+    }
+
+    Compress-Archive -Path (Join-Path $stagingDir "*") -DestinationPath $destinationPath -CompressionLevel Optimal
+}
+finally {
+    Remove-Item -Recurse -Force $stagingDir
+}
 
 # Restaurar manifest.json original después del build de Firefox
 if ($target -eq "firefox") {
