@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const root = document.getElementById('root');
     const vu = document.getElementById('vu');
     const ctx = vu.getContext('2d');
-    vu.width = vu.clientWidth || 278; vu.height = 24;
+    vu.width = vu.clientWidth || 278; vu.height = 34;
 
     const statusDot = document.getElementById('statusDot');
     const reductionBadge = document.getElementById('reductionBadge');
