@@ -102,7 +102,7 @@ input[type="range"]::-moz-range-thumb{width:12px;height:12px;background:var(--ac
 
 /* SETTINGS CARD */
 .about-card .text-center{text-align:center}
-.about-card .about-icon{width:32px;height:32px;margin:0 auto 8px;display:block}
+.about-card .about-icon{width:48px;height:48px;margin:0 auto 8px;display:block}
 .about-card h2{font-size:1rem;font-weight:700;color:var(--text)}
 .about-card h2 .about-version{font-size:.75rem;color:var(--success);font-weight:600;margin-left:4px}
 .about-card hr{margin:12px 0;border:none;height:1px;background:var(--border)}
