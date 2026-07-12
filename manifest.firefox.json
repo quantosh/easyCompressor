@@ -32,7 +32,7 @@
     "gecko": {
       "id": "quantosh@gmail.com",
       "data_collection_permissions": {
-        "optional": []
+        "required": ["technical"]
       }
     }
   }
