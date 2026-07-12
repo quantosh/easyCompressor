@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
   "name": "Easy Compressor",
-  "version": "1.0",
+  "version": "1.1",
   "description": "Easy way to apply a dynamic compressor to audio in browser.",
-  "permissions": ["scripting", "tabs", "activeTab"],
+  "permissions": ["activeTab", "storage"],
   "host_permissions": ["<all_urls>"],
   "action": {
     "default_popup": "popup.html",
@@ -30,7 +30,10 @@
   },
   "browser_specific_settings": {
     "gecko": {
-      "id": "easycompressor@tudominio.com"
+      "id": "quantosh@gmail.com",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
     }
   }
 }

@@ -1,154 +1,149 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Easy Compressor</title>
-  <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      width: 280px;
-      padding: 0.75rem;
-      background-color: #1a202c;
-      color: #e2e8f0;
-      border-radius: 0.5rem;
-    }
-    .container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 0.75rem;
-    }
-    .title {
-      font-size: 1.25rem;
-      font-weight: 700;
-      margin-bottom: 0.25rem;
-    }
-    .description {
-      font-size: 0.875rem;
-      color: #a0aec0;
-      text-align: center;
-    }
-    .compress-button {
-      width: 100%;
-      padding: 0.6rem 1.25rem;
-      font-size: 1rem;
-      font-weight: 600;
-      color: #fff;
-      background-color: #4c51bf;
-      border-radius: 9999px;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-      transition-property: background-color;
-      transition-duration: 200ms;
-      outline: 2px solid transparent;
-      outline-offset: 2px;
-      cursor: pointer;
-      border: none;
-    }
-    .compress-button:hover {
-      background-color: #43419e;
-    }
-    .compress-button.active {
-      background-color: #38a169;
-    }
-    .compress-button.active:hover {
-      background-color: #2f855a;
-    }
-    #advanced-controls {
-      display: none;
-      width: calc(100% - 1.5rem); /* Ajustado para coincidir con el padding del contenedor */
-      flex-direction: column;
-      gap: 0.75rem;
-      margin-top: 0.5rem;
-      padding: 0.75rem;
-      background-color: #2d3748;
-      border-radius: 0.5rem;
-    }
-    #advanced-controls.visible {
-      display: flex;
-    }
-    .control-group {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 0.35rem;
-    }
-    .control-group label {
-      font-size: 0.875rem;
-      color: #a0aec0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .control-group input[type="range"] {
-      width: 100%;
-      -webkit-appearance: none;
-      appearance: none;
-      height: 8px;
-      background: #4a5568;
-      border-radius: 5px;
-      outline: none;
-    }
-    .control-group input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 16px;
-      height: 16px;
-      background: #667eea;
-      border-radius: 50%;
-      cursor: pointer;
-    }
-    .control-group input[type="range"]::-moz-range-thumb {
-      width: 16px;
-      height: 16px;
-      background: #667eea;
-      border-radius: 50%;
-      cursor: pointer;
-    }
-    #meter-canvas {
-      width: 100%;
-      height: 20px;
-      background-color: #4a5568;
-      border-radius: 5px;
-    }
-    .settings-button {
-      background: none;
-      border: none;
-      color: #667eea;
-      font-size: 0.875rem;
-      cursor: pointer;
-      margin-top: 0.25rem;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Easy Compressor</title>
+<link rel="stylesheet" href="popup.css">
 </head>
 <body>
-  <div class="container">
-    <h1 class="title">Easy Compressor</h1>
-    <p class="description">
-      Click to apply audio compression on the current tab.
-    </p>
-    <button id="compressButton" class="compress-button">
-      Enable Compressor
-    </button>
-    <button id="settingsButton" class="settings-button">
-      Settings
-    </button>
-    <div id="advanced-controls">
-      <canvas id="meter-canvas" width="240" height="20" style="width:100%;height:20px;display:block;margin-bottom:0.5rem;"></canvas>
-      <div class="control-group">
-        <label for="threshold-slider">
-          Threshold: <span id="threshold-value">-30 dB</span>
-        </label>
-        <input type="range" id="threshold-slider" min="-60" max="0" value="-30" step="1">
+<div class="container" id="root">
+  <div class="header">
+    <div class="header-left">
+      <span class="status-dot" id="statusDot"></span>
+      <h1>Easy Compressor</h1>
+    </div>
+    <div class="header-right">
+      <button class="btn-toggle" id="gearBtn">⚙ Settings</button>
+    </div>
+  </div>
+
+  <!-- SETTINGS VIEW -->
+  <div class="view-settings" id="viewSettings">
+    <div class="view-header">
+      <button class="back-btn" id="backBtn">←</button>
+      <span>Settings</span>
+    </div>
+    <div class="about-card">
+      <div class="text-center">
+        <img class="about-icon" src="images/icon-settings.png" alt="Easy Compressor">
+        <h2>Easy Compressor <span class="about-version">v1.0</span></h2>
       </div>
-      <div class="control-group">
-        <label for="ratio-slider">
-          Ratio: <span id="ratio-value">8:1</span>
+      <hr>
+      <div class="menu-row">
+        <p>Advanced Mode</p>
+        <label class="toggle-md">
+          <input type="checkbox" id="modeToggle">
+          <span class="track"></span>
+          <span class="thumb"></span>
         </label>
-        <input type="range" id="ratio-slider" min="1" max="20" value="8" step="1">
+      </div>
+      <hr>
+      <div class="menu-row">
+        <p>Equalizer</p>
+        <label class="toggle-md">
+          <input type="checkbox" id="eqEnableToggle">
+          <span class="track"></span>
+          <span class="thumb"></span>
+        </label>
+      </div>
+      <button class="about-btn" id="resetBtn" style="margin-top:8px;background:transparent;color:var(--danger);border:1px solid var(--danger);border-radius:12px;padding:8px;font-size:.8rem;font-weight:600;font-family:inherit;cursor:pointer;transition:filter .2s">↺ Reset Settings</button>
+      <button class="about-btn" id="settingsCloseBtn">Close</button>
+    </div>
+  </div>
+
+  <!-- MAIN VIEW -->
+  <div class="view-main" id="viewMain">
+    <div class="meter-group">
+      <div class="meter-labels">
+        <span>Level</span>
+        <span class="reduction-badge" id="reductionBadge">Gain reduction</span>
+      </div>
+      <div class="vu-wrap"><canvas id="vu" width="278"></canvas></div>
+    </div>
+
+    <!-- BASIC MODE -->
+    <div class="mode-basic-only">
+      <button id="enableBtnBasic" class="btn-full">Enable Compressor</button>
+      <div class="intensity-wrap">
+        <div class="intensity-header">
+          <span>Intensity</span>
+          <span class="val" id="intensityVal">Medium</span>
+        </div>
+        <input type="range" id="intensitySlider" min="1" max="3" step="1" value="2">
+        <div class="intensity-ticks">
+          <span>Light</span>
+          <span>Medium</span>
+          <span>Heavy</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADVANCED MODE -->
+    <div class="mode-advanced-only">
+      <div class="btn-row">
+        <button id="enableBtnAdv" class="btn-primary">Enable Compressor</button>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">Compressor</div>
+        <div class="s-group">
+          <div class="control-group">
+            <div class="slider-header"><label>Threshold</label><span class="val" id="threshold-val">-30 dB</span></div>
+            <input type="range" id="threshold-sl" min="-60" max="0" value="-30" step="1">
+          </div>
+          <div class="control-group">
+            <div class="slider-header"><label>Ratio</label><span class="val" id="ratio-val">8:1</span></div>
+            <input type="range" id="ratio-sl" min="1" max="20" value="8" step="1">
+          </div>
+          <div class="control-group">
+            <div class="slider-header"><label>Attack</label><span class="val" id="attack-val">3 ms</span></div>
+            <input type="range" id="attack-sl" min="0" max="200" value="3" step="1">
+          </div>
+          <div class="control-group">
+            <div class="slider-header"><label>Release</label><span class="val" id="release-val">250 ms</span></div>
+            <input type="range" id="release-sl" min="10" max="1000" value="250" step="10">
+          </div>
+          <div class="control-group">
+            <div class="slider-header"><label>Gain</label><span class="val" id="gain-val">0 dB</span></div>
+            <input type="range" id="gain-sl" min="0" max="24" value="0" step="1">
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="panel eq-section hidden" id="eqSection">
+      <div class="panel-header">
+        <span class="panel-title">Equalizer</span>
+      </div>
+      <div class="presets" id="eqPresets">
+        <button class="preset-btn active" data-p="flat">Flat</button>
+        <button class="preset-btn" data-p="bass">Bass</button>
+        <button class="preset-btn" data-p="voice">Voice</button>
+        <button class="preset-btn" data-p="loud">Loud</button>
+      </div>
+      <div class="s-group">
+        <div class="control-group">
+          <div class="slider-header"><label>Bass</label><span class="val" id="eq-bass-val">0 dB</span></div>
+          <input type="range" id="eq-bass-sl" min="-12" max="12" value="0" step="1">
+        </div>
+        <div class="control-group">
+          <div class="slider-header"><label>Mid</label><span class="val" id="eq-mid-val">0 dB</span></div>
+          <input type="range" id="eq-mid-sl" min="-12" max="12" value="0" step="1">
+        </div>
+        <div class="control-group">
+          <div class="slider-header"><label>Treble</label><span class="val" id="eq-treble-val">0 dB</span></div>
+          <input type="range" id="eq-treble-sl" min="-12" max="12" value="0" step="1">
+        </div>
       </div>
     </div>
   </div>
-  <script src="popup.js"></script>
+  <div class="app-footer">
+    Created by <a href="https://github.com/quantosh" target="_blank" rel="noopener">@quantosh</a>
+    <span style="margin:0 3px;color:var(--text-muted)">|</span>
+    <a href="https://www.buymeacoffee.com/quantosh" target="_blank" rel="noopener">☕ Buy me a coffee</a>
+  </div>
+<script src="popup.js"></script>
 </body>
 </html>

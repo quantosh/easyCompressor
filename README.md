@@ -1,54 +1,51 @@
-# Easy Compressor
+<div align="center">
+  <a href="">
+    <img
+      src="images/icon-settings.png"
+      alt="Easy Compressor"
+      height="64"
+    />
+  </a>
+  <h3>
+    <b>
+      Easy Compressor
+    </b>
+  </h3>
+  <b>
+    Dynamic audio compressor for your browser
+  </b>
+  <br />
+</div>
 
-**Easy Compressor** es una extensión para navegador que te permite aplicar compresión dinámica de audio en cualquier pestaña, con medidor visual y controles avanzados.
+---
 
-## Instalación manual y releases para cada navegador
+Browser extension that applies dynamic range compression to audio in any tab. Features real-time VU metering, 3-band EQ, and both simple (intensity) and advanced (full parameter) modes.
 
-> **Nota:** Esta extensión no está publicada en la Chrome Web Store porque Google exige un pago para publicar, lo cual no es viable para un proyecto gratuito y de código abierto. Puedes instalarla manualmente o descargar el ZIP listo para tu navegador desde la sección de releases.
+## Download
 
-### 1. Descarga el ZIP correcto para tu navegador
+Grab the right ZIP for your browser from [Releases](https://github.com/quantosh/easyCompressor/releases):
 
-Ve a la sección [Releases](https://github.com/quantosh/easyCompressor/releases) y descarga:
-- `Easy.Compressor-chrome.zip` para Chrome
-- `Easy.Compressor-edge.zip` para Edge
-- `Easy.Compressor-firefox.zip` para Firefox
+- `Easy.Compressor-chrome.zip` for Chrome
+- `Easy.Compressor-edge.zip` for Edge
+- `Easy.Compressor-firefox.zip` for Firefox
 
-Cada ZIP contiene el manifest adecuado para ese navegador.
+## Manual install
 
-### 2. Instala la extensión manualmente
-
-**Chrome/Edge:**
-- Ve a `chrome://extensions/`
-- Activa el modo **Desarrollador**
-- Haz clic en **"Cargar descomprimida"** y selecciona la carpeta descomprimida
+**Chrome / Edge:**
+1. `chrome://extensions` → Developer mode
+2. Load unpacked → select the folder
 
 **Firefox:**
-- Ve a `about:addons`
-- Haz clic en el engranaje > **Instalar complemento desde archivo...** y selecciona el ZIP
+1. `about:addons` → Gear → Install Add-on From File
+2. Select the ZIP
 
-## Uso
+## Usage
 
-- Haz clic en el icono de la extensión para abrir el popup.
-- Pulsa **Enable Compressor** para activar la compresión en la pestaña actual.
-- Pulsa **Settings** para ajustar el umbral, ratio y ver el vumeter con la reducción de ganancia en tiempo real.
+1. Open the popup from the toolbar
+2. Enable the compressor with the Enable button
+3. Adjust intensity (simple mode) or parameters (advanced mode)
+4. The VU meter shows level and gain reduction in real time
 
-## ¿Por qué no está en la Web Store?
+## Credits
 
-Google exige un pago para publicar extensiones, incluso gratuitas. Este proyecto es open source y no tiene ánimo de lucro, por lo que solo está disponible para instalación manual.
-
-## Multi-navegador
-
-- Elige el ZIP adecuado para tu navegador en la sección de releases.
-- El código fuente es el mismo para todos, solo cambia el manifest.
-
-## Créditos
-
-Desarrollado por [quantosh](https://github.com/quantosh) y colaboradores.
-
----
-
-¡Gracias por usar software libre!
-
----
-
-[English README here](README.en.md)
+Developed by [@quantosh](https://github.com/quantosh)

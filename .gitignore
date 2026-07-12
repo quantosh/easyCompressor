@@ -1,0 +1,10 @@
+_staging/
+Easy.Compressor-*/
+*.zip
+*.crx
+*.pem
+
+IconKitchen-Output/
+
+images/web/
+IconKitchen-Output/
