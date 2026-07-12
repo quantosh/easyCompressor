@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const compressBtn = document.getElementById('compressBtn');
     const eqToggle = document.getElementById('eqToggle');
     const eqSection = document.getElementById('eqSection');
+    const eqEnableBtn = document.getElementById('eqEnableBtn');
     const vu = document.getElementById('vu');
     const statusDot = document.getElementById('statusDot');
     const reductionBadge = document.getElementById('reductionBadge');
@@ -32,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
     vu.width = vu.clientWidth || 278;
     vu.height = 24;
 
-    let state = { enabled: false, eqOn: true, bass: 0, mid: 0, treble: 0, threshold: -30, ratio: 8, attack: 3, release: 250, gain: 0 };
+    let state = { enabled: false, eqOn: true, eqEnabled: true, bass: 0, mid: 0, treble: 0, threshold: -30, ratio: 8, attack: 3, release: 250, gain: 0 };
     let isCustom = false;
 
     chrome.runtime.onMessage.addListener(msg => {
@@ -105,6 +106,13 @@ document.addEventListener('DOMContentLoaded', () => {
         state.eqOn = !state.eqOn;
         eqToggle.classList.toggle('on', state.eqOn);
         eqSection.classList.toggle('hidden', !state.eqOn);
+    });
+
+    eqEnableBtn.addEventListener('click', () => {
+        state.eqEnabled = !state.eqEnabled;
+        eqEnableBtn.classList.toggle('on', state.eqEnabled);
+        eqEnableBtn.textContent = state.eqEnabled ? 'ON' : 'OFF';
+        sendState();
     });
 
     presetBtns.forEach(b => b.addEventListener('click', () => setPreset(b.dataset.p)));

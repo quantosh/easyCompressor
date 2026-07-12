@@ -8,6 +8,7 @@ let compressorState = {
 };
 
 let eqState = {
+    enabled: true,
     bass: 0,
     mid: 0,
     treble: 0
@@ -34,6 +35,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         if (request.attack !== undefined) compressorState.attack = parseFloat(request.attack);
         if (request.release !== undefined) compressorState.release = parseFloat(request.release);
         if (request.gain !== undefined) compressorState.gain = parseFloat(request.gain);
+        if (request.eqEnabled !== undefined) eqState.enabled = !!request.eqEnabled;
         if (request.bass !== undefined) eqState.bass = parseFloat(request.bass);
         if (request.mid !== undefined) eqState.mid = parseFloat(request.mid);
         if (request.treble !== undefined) eqState.treble = parseFloat(request.treble);

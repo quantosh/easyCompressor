@@ -9,6 +9,7 @@ let analyser = null;
 let gainNode = null;
 let mediaElement = null;
 let isCompressorEnabled = false;
+let isEQEnabled = true;
 let animationFrameId = null;
 let pendingUpdate = null;
 
@@ -77,15 +78,24 @@ function reconnectAudioGraph() {
         try { eqBass.disconnect(); } catch (e) {}
         try { source.disconnect(); } catch (e) {}
 
-        try { source.connect(eqBass); } catch (e) {}
-        try { eqBass.connect(eqMid); } catch (e) {}
-        try { eqMid.connect(eqTreble); } catch (e) {}
+        if (isEQEnabled) {
+            try { source.connect(eqBass); } catch (e) {}
+            try { eqBass.connect(eqMid); } catch (e) {}
+            try { eqMid.connect(eqTreble); } catch (e) {}
 
-        if (isCompressorEnabled) {
-            try { eqTreble.connect(compressor); } catch (e) {}
-            try { compressor.connect(makeupGain); } catch (e) {}
+            if (isCompressorEnabled) {
+                try { eqTreble.connect(compressor); } catch (e) {}
+                try { compressor.connect(makeupGain); } catch (e) {}
+            } else {
+                try { eqTreble.connect(makeupGain); } catch (e) {}
+            }
         } else {
-            try { eqTreble.connect(makeupGain); } catch (e) {}
+            if (isCompressorEnabled) {
+                try { source.connect(compressor); } catch (e) {}
+                try { compressor.connect(makeupGain); } catch (e) {}
+            } else {
+                try { source.connect(makeupGain); } catch (e) {}
+            }
         }
 
         try { makeupGain.connect(analyser); } catch (e) {}
@@ -97,7 +107,11 @@ function reconnectAudioGraph() {
 function updateCompressor(state) {
     if (!compressor || !source || !gainNode) return;
 
-    if (state.eq) applyEQ(state.eq);
+    if (state.eq) {
+        applyEQ(state.eq);
+        isEQEnabled = state.eq.enabled !== false;
+        reconnectAudioGraph();
+    }
 
     if (state.threshold !== undefined) compressor.threshold.value = parseFloat(state.threshold);
     if (state.ratio !== undefined) compressor.ratio.value = parseFloat(state.ratio);
