@@ -1,254 +1,174 @@
 const EQ_PRESETS = {
-    flat:       { bass: 0,  mid: 0,  treble: 0 },
-    'bass-boost': { bass: 6,  mid: 0,  treble: 2 },
-    voice:      { bass: -3, mid: 5,  treble: 3 },
-    loudness:   { bass: 4,  mid: 0,  treble: 4 }
+    flat:  { bass: 0,  mid: 0,  treble: 0 },
+    bass:  { bass: 6,  mid: 0,  treble: 2 },
+    voice: { bass: -3, mid: 5,  treble: 3 },
+    loud:  { bass: 4,  mid: 0,  treble: 4 }
 };
 
+const COMP_SLIDERS = [
+    { id: 'threshold-sl', valId: 'threshold-val', min: -60, max: 0, step: 1, key: 'threshold', fmt: v => `${v} dB` },
+    { id: 'ratio-sl',    valId: 'ratio-val',    min: 1,   max: 20, step: 1, key: 'ratio',    fmt: v => `${v}:1` },
+    { id: 'attack-sl',   valId: 'attack-val',   min: 0,   max: 200, step: 1, key: 'attack',   fmt: v => `${v} ms` },
+    { id: 'release-sl',  valId: 'release-val',  min: 10,  max: 1000, step: 10, key: 'release', fmt: v => `${v} ms` },
+    { id: 'gain-sl',     valId: 'gain-val',     min: 0,   max: 24,  step: 1, key: 'gain',     fmt: v => `${v} dB` }
+];
+
+const EQ_SLIDERS = [
+    { id: 'eq-bass-sl',   valId: 'eq-bass-val',   min: -12, max: 12, step: 1, key: 'bass',   fmt: v => `${v > 0 ? '+' : ''}${v} dB` },
+    { id: 'eq-mid-sl',    valId: 'eq-mid-val',    min: -12, max: 12, step: 1, key: 'mid',    fmt: v => `${v > 0 ? '+' : ''}${v} dB` },
+    { id: 'eq-treble-sl', valId: 'eq-treble-val', min: -12, max: 12, step: 1, key: 'treble', fmt: v => `${v > 0 ? '+' : ''}${v} dB` }
+];
+
 document.addEventListener('DOMContentLoaded', () => {
-    const compressButton = document.getElementById('compressButton');
-    const settingsButton = document.getElementById('settingsButton');
-    const advancedControls = document.getElementById('advanced-controls');
-    const thresholdSlider = document.getElementById('threshold-slider');
-    const ratioSlider = document.getElementById('ratio-slider');
-    const thresholdValue = document.getElementById('threshold-value');
-    const ratioValue = document.getElementById('ratio-value');
-    const meterCanvas = document.getElementById('meter-canvas');
+    const compressBtn = document.getElementById('compressBtn');
+    const eqToggle = document.getElementById('eqToggle');
+    const eqSection = document.getElementById('eqSection');
+    const vu = document.getElementById('vu');
     const statusDot = document.getElementById('statusDot');
     const reductionBadge = document.getElementById('reductionBadge');
+    const presetBtns = document.querySelectorAll('[data-p]');
 
-    const eqBass = document.getElementById('eq-bass');
-    const eqMid = document.getElementById('eq-mid');
-    const eqTreble = document.getElementById('eq-treble');
-    const eqBassValue = document.getElementById('eq-bass-value');
-    const eqMidValue = document.getElementById('eq-mid-value');
-    const eqTrebleValue = document.getElementById('eq-treble-value');
-    const presetBtns = document.querySelectorAll('[data-preset]');
+    let ctx = vu.getContext('2d');
+    vu.width = vu.clientWidth || 278;
+    vu.height = 24;
 
-    let meterContext = null;
-    if (meterCanvas) {
-        meterCanvas.width = meterCanvas.clientWidth || 268;
-        meterCanvas.height = 24;
-        meterContext = meterCanvas.getContext('2d');
-    }
-
-    let isCompressorActive = false;
-    let currentPreset = 'flat';
+    let state = { enabled: false, eqOn: true, bass: 0, mid: 0, treble: 0, threshold: -30, ratio: 8, attack: 3, release: 250, gain: 0 };
     let isCustom = false;
 
-    chrome.runtime.onMessage.addListener((message) => {
-        if (message.action === "audioLevel") {
-            drawMeter(message.level, message.reduction);
-        }
+    chrome.runtime.onMessage.addListener(msg => {
+        if (msg.action === 'audioLevel') drawMeter(msg.level, msg.reduction);
     });
 
-    function updateUI(state) {
-        if (compressButton) {
-            if (state.active) {
-                compressButton.textContent = "Disable Compressor";
-                compressButton.classList.add('active');
-            } else {
-                compressButton.textContent = "Enable Compressor";
-                compressButton.classList.remove('active');
-            }
-        }
-        if (statusDot) {
-            statusDot.classList.toggle('active', state.active);
-        }
+    function updateUI() {
+        compressBtn.textContent = state.enabled ? 'Disable Compressor' : 'Enable Compressor';
+        compressBtn.classList.toggle('active', state.enabled);
+        statusDot.classList.toggle('active', state.enabled);
     }
 
-    let lastLevel = 0;
-    let lastReduction = 0;
-    let peakLevel = 0;
-    let peakDecay = 0;
-
-    function drawMeter(level, reductionDb) {
-        if (!meterCanvas || !meterContext) return;
-        const w = meterCanvas.width;
-        const h = meterCanvas.height;
-
-        let scaled = Math.min(1, level * 1.5);
-        const decay = 0.08;
-        if (scaled > lastLevel) {
-            lastLevel = scaled;
-        } else {
-            lastLevel = lastLevel * (1 - decay) + scaled * decay;
-        }
-
-        let reduction = 0;
-        if (typeof reductionDb === 'number' && reductionDb < 0) {
-            reduction = Math.min(1, Math.abs(reductionDb) / 24);
-        }
-        if (reduction > lastReduction) {
-            lastReduction = reduction;
-        } else {
-            lastReduction = lastReduction * (1 - decay) + reduction * decay;
-        }
-
-        if (scaled > peakLevel) {
-            peakLevel = scaled;
-            peakDecay = 0;
-        } else {
-            peakDecay += 0.02;
-            peakLevel = Math.max(0, peakLevel - peakDecay);
-        }
-
-        meterContext.clearRect(0, 0, w, h);
-        const bgGrad = meterContext.createLinearGradient(0, 0, w, 0);
-        bgGrad.addColorStop(0, '#68d391');
-        bgGrad.addColorStop(0.5, '#ecc94b');
-        bgGrad.addColorStop(1, '#f56565');
-        meterContext.fillStyle = bgGrad;
-        meterContext.fillRect(0, 0, w * lastLevel, h);
-
-        meterContext.globalAlpha = 0.15;
-        meterContext.fillStyle = '#fff';
-        meterContext.fillRect(0, 0, w * lastLevel, h);
-        meterContext.globalAlpha = 1;
-
-        if (lastReduction > 0.01) {
-            const rw = w * lastReduction;
-            meterContext.fillStyle = 'rgba(245, 90, 90, 0.4)';
-            meterContext.fillRect(Math.max(0, w * lastLevel - rw), 0, rw, h);
-        }
-
-        if (peakLevel > 0.01) {
-            const px = w * peakLevel;
-            meterContext.fillStyle = '#fff';
-            meterContext.fillRect(px - 1, 0, 2, h);
-        }
-
-        if (reductionBadge) {
-            reductionBadge.classList.toggle('visible', lastReduction > 0.02);
-        }
+    function setSliderVal(slider, val) {
+        const sl = document.getElementById(slider.id);
+        const vl = document.getElementById(slider.valId);
+        if (sl) sl.value = val;
+        if (vl) vl.textContent = slider.fmt(val);
     }
 
-    function selectPreset(name) {
-        currentPreset = name;
+    function readSlider(slider) {
+        const sl = document.getElementById(slider.id);
+        return sl ? parseFloat(sl.value) : 0;
+    }
+
+    function sendState() {
+        chrome.runtime.sendMessage({ action: 'updateState', ...state }).catch(() => {});
+    }
+
+    function setPreset(name) {
+        const v = EQ_PRESETS[name];
+        if (!v) return;
+        state.bass = v.bass; state.mid = v.mid; state.treble = v.treble;
+        EQ_SLIDERS.forEach(s => setSliderVal(s, state[s.key]));
+        presetBtns.forEach(b => b.classList.toggle('active', b.dataset.p === name));
         isCustom = false;
-        presetBtns.forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.preset === name);
-        });
-        const vals = EQ_PRESETS[name];
-        if (vals) {
-            setEQValues(vals.bass, vals.mid, vals.treble);
-            sendEQ();
-        }
+        sendState();
     }
 
-    function setEQValues(bass, mid, treble) {
-        if (eqBass) eqBass.value = bass;
-        if (eqMid) eqMid.value = mid;
-        if (eqTreble) eqTreble.value = treble;
-        if (eqBassValue) eqBassValue.textContent = `${bass} dB`;
-        if (eqMidValue) eqMidValue.textContent = `${mid} dB`;
-        if (eqTrebleValue) eqTrebleValue.textContent = `${treble} dB`;
-    }
-
-    function sendEQ() {
-        chrome.runtime.sendMessage({
-            action: "updateEQ",
-            bass: eqBass.value,
-            mid: eqMid.value,
-            treble: eqTreble.value
-        });
-    }
-
-    function onEQSliderChange() {
+    function onEQChange() {
         if (!isCustom) {
             isCustom = true;
-            presetBtns.forEach(btn => btn.classList.remove('active'));
-            currentPreset = 'custom';
+            presetBtns.forEach(b => b.classList.remove('active'));
         }
-        const b = parseInt(eqBass.value);
-        const m = parseInt(eqMid.value);
-        const t = parseInt(eqTreble.value);
-        if (eqBassValue) eqBassValue.textContent = `${b} dB`;
-        if (eqMidValue) eqMidValue.textContent = `${m} dB`;
-        if (eqTrebleValue) eqTrebleValue.textContent = `${t} dB`;
-        sendEQ();
+        state.bass = readSlider(EQ_SLIDERS[0]);
+        state.mid = readSlider(EQ_SLIDERS[1]);
+        state.treble = readSlider(EQ_SLIDERS[2]);
+        EQ_SLIDERS.forEach(s => {
+            const vl = document.getElementById(s.valId);
+            if (vl) vl.textContent = s.fmt(state[s.key]);
+        });
+        sendState();
+    }
+
+    function onCompChange() {
+        COMP_SLIDERS.forEach(s => {
+            state[s.key] = readSlider(s);
+            const vl = document.getElementById(s.valId);
+            if (vl) vl.textContent = s.fmt(state[s.key]);
+        });
+        sendState();
+    }
+
+    compressBtn.addEventListener('click', () => {
+        state.enabled = !state.enabled;
+        updateUI();
+        sendState();
+    });
+
+    eqToggle.addEventListener('click', () => {
+        state.eqOn = !state.eqOn;
+        eqToggle.classList.toggle('on', state.eqOn);
+        eqSection.classList.toggle('hidden', !state.eqOn);
+    });
+
+    presetBtns.forEach(b => b.addEventListener('click', () => setPreset(b.dataset.p)));
+
+    COMP_SLIDERS.forEach(s => {
+        const el = document.getElementById(s.id);
+        if (el) el.addEventListener('input', onCompChange);
+    });
+
+    EQ_SLIDERS.forEach(s => {
+        const el = document.getElementById(s.id);
+        if (el) el.addEventListener('input', onEQChange);
+    });
+
+    function drawMeter(level, reductionDb) {
+        const w = vu.width, h = vu.height;
+        let scaled = Math.min(1, (level || 0) * 1.5);
+        const decay = 0.08;
+        if (scaled > window._vuLv) window._vuLv = scaled;
+        else window._vuLv = (window._vuLv || 0) * (1 - decay) + scaled * decay;
+        let reduction = 0;
+        if (typeof reductionDb === 'number' && reductionDb < 0) reduction = Math.min(1, Math.abs(reductionDb) / 24);
+        if (reduction > window._vuRd) window._vuRd = reduction;
+        else window._vuRd = (window._vuRd || 0) * (1 - decay) + reduction * decay;
+        if (scaled > (window._vuPk || 0)) { window._vuPk = scaled; window._vuPd = 0; }
+        else { window._vuPd = (window._vuPd || 0) + 0.02; window._vuPk = Math.max(0, (window._vuPk || 0) - window._vuPd); }
+        ctx.clearRect(0, 0, w, h);
+        const grad = ctx.createLinearGradient(0, 0, w, 0);
+        grad.addColorStop(0, '#68d391'); grad.addColorStop(0.5, '#ecc94b'); grad.addColorStop(1, '#f56565');
+        ctx.fillStyle = grad; ctx.fillRect(0, 0, w * Math.min(1, window._vuLv), h);
+        ctx.globalAlpha = 0.12; ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, w * Math.min(1, window._vuLv), h); ctx.globalAlpha = 1;
+        if ((window._vuRd || 0) > 0.01) {
+            const rw = w * window._vuRd;
+            ctx.fillStyle = 'rgba(245,90,90,0.35)'; ctx.fillRect(Math.max(0, w * Math.min(1, window._vuLv) - rw), 0, rw, h);
+        }
+        if ((window._vuPk || 0) > 0.01) { ctx.fillStyle = '#fff'; ctx.fillRect(w * window._vuPk - 1, 0, 2, h); }
+        if (reductionBadge) reductionBadge.classList.toggle('visible', (window._vuRd || 0) > 0.02);
     }
 
     function init() {
-        chrome.runtime.sendMessage({ action: "getState" }, (state) => {
-            if (state) {
-                isCompressorActive = state.active;
-                if (thresholdSlider) thresholdSlider.value = state.threshold;
-                if (ratioSlider) ratioSlider.value = state.ratio;
-                if (thresholdValue) thresholdValue.textContent = `${state.threshold} dB`;
-                if (ratioValue) ratioValue.textContent = `${state.ratio}:1`;
-                updateUI(state);
+        chrome.runtime.sendMessage({ action: 'getState' }, (bg) => {
+            if (!bg) return;
+            state.enabled = !!bg.active;
+            state.threshold = bg.threshold ?? -30;
+            state.ratio = bg.ratio ?? 8;
+            state.attack = bg.attack ?? 3;
+            state.release = bg.release ?? 250;
+            state.gain = bg.gain ?? 0;
+            COMP_SLIDERS.forEach(s => setSliderVal(s, state[s.key]));
+            updateUI();
 
-                if (state.eq) {
-                    const eq = state.eq;
-                    setEQValues(eq.bass, eq.mid, eq.treble);
-
-                    let found = false;
-                    for (const [name, vals] of Object.entries(EQ_PRESETS)) {
-                        if (vals.bass === eq.bass && vals.mid === eq.mid && vals.treble === eq.treble) {
-                            selectPreset(name);
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found) {
-                        isCustom = true;
-                        presetBtns.forEach(btn => btn.classList.remove('active'));
-                    }
-                }
+            const eq = bg.eq || {};
+            state.bass = eq.bass ?? 0;
+            state.mid = eq.mid ?? 0;
+            state.treble = eq.treble ?? 0;
+            EQ_SLIDERS.forEach(s => setSliderVal(s, state[s.key]));
+            let found = null;
+            for (const [name, v] of Object.entries(EQ_PRESETS)) {
+                if (v.bass === state.bass && v.mid === state.mid && v.treble === state.treble) { found = name; break; }
             }
-        });
-    }
-
-    if (compressButton) {
-        compressButton.addEventListener('click', () => {
-            isCompressorActive = !isCompressorActive;
-            const message = {
-                action: "toggleCompressor",
-                active: isCompressorActive,
-                threshold: thresholdSlider.value,
-                ratio: ratioSlider.value
-            };
-            chrome.runtime.sendMessage(message, () => updateUI({ ...message }));
-        });
-    }
-
-    if (settingsButton && advancedControls) {
-        settingsButton.addEventListener('click', () => {
-            advancedControls.classList.toggle('visible');
-        });
-    }
-
-    presetBtns.forEach(btn => {
-        btn.addEventListener('click', () => selectPreset(btn.dataset.preset));
-    });
-
-    if (eqBass) eqBass.addEventListener('input', onEQSliderChange);
-    if (eqMid) eqMid.addEventListener('input', onEQSliderChange);
-    if (eqTreble) eqTreble.addEventListener('input', onEQSliderChange);
-
-    function sendSettingsUpdate() {
-        chrome.runtime.sendMessage({
-            action: "updateSettings",
-            threshold: thresholdSlider.value,
-            ratio: ratioSlider.value
-        });
-    }
-
-    if (thresholdSlider && thresholdValue) {
-        thresholdSlider.addEventListener('input', () => {
-            thresholdValue.textContent = `${thresholdSlider.value} dB`;
-            sendSettingsUpdate();
-        });
-    }
-
-    if (ratioSlider && ratioValue) {
-        ratioSlider.addEventListener('input', () => {
-            ratioValue.textContent = `${ratioSlider.value}:1`;
-            sendSettingsUpdate();
+            if (found) { presetBtns.forEach(b => b.classList.toggle('active', b.dataset.p === found)); isCustom = false; }
+            else { presetBtns.forEach(b => b.classList.remove('active')); isCustom = true; }
         });
     }
 
     init();
-    drawMeter(0);
 });

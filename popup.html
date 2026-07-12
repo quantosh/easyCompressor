@@ -1,191 +1,131 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Easy Compressor</title>
-  <style>
-    :root {
-      color-scheme: light dark;
-      --bg: light-dark(#ffffff, #292a2d);
-      --surface: light-dark(#f8f9fa, #35363a);
-      --text: light-dark(#202124, #e8eaed);
-      --text-secondary: light-dark(#5f6368, #9aa0a6);
-      --text-muted: light-dark(#80868b, #80868b);
-      --border: light-dark(#dadce0, #5f6368);
-      --border-hover: light-dark(#bdc1c6, #7a7f85);
-      --accent: light-dark(#1a73e8, #8ab4f8);
-      --accent-hover: light-dark(#1765cc, #a8c7fa);
-      --success: light-dark(#188038, #81c995);
-      --danger: light-dark(#d93025, #f28b82);
-      --dot-inactive: light-dark(#dadce0, #5f6368);
-      --slider-track: light-dark(#dadce0, #5f6368);
-      --slider-thumb-border: light-dark(#ffffff, #292a2d);
-    }
-
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: system-ui, -apple-system, sans-serif;
-      width: 300px;
-      padding: 0.75rem;
-      background: var(--bg);
-      color: var(--text);
-      font-size: 0.875rem;
-      -webkit-font-smoothing: antialiased;
-      overflow: hidden;
-    }
-    .container { display: flex; flex-direction: column; gap: 0.5rem; }
-    .header { display: flex; align-items: center; justify-content: space-between; }
-    .header-title { display: flex; align-items: center; gap: 0.5rem; }
-    .header-title h1 { font-size: 1rem; font-weight: 700; letter-spacing: -0.01em; }
-    .status-dot {
-      width: 8px; height: 8px; border-radius: 50%; background: var(--dot-inactive);
-      transition: background 0.3s, box-shadow 0.3s; flex-shrink: 0;
-    }
-    .status-dot.active { background: var(--success); box-shadow: 0 0 6px color-mix(in srgb, var(--success) 60%, transparent); }
-    .header-version { font-size: 0.7rem; color: var(--text-muted); }
-    .description { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4; }
-    .compress-button {
-      width: 100%; padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 600;
-      font-family: inherit; color: #fff; background: var(--accent); border: 1px solid var(--accent);
-      border-radius: 8px; cursor: pointer; transition: background 0.2s, border-color 0.2s, transform 0.1s;
-    }
-    .compress-button:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
-    .compress-button:active { transform: scale(0.98); }
-    .compress-button.active { background: transparent; border-color: var(--success); color: var(--success); }
-    .compress-button.active:hover { background: color-mix(in srgb, var(--success) 10%, transparent); }
-    .meter-section { display: flex; flex-direction: column; gap: 0.2rem; }
-    .meter-labels {
-      display: flex; justify-content: space-between; font-size: 0.7rem;
-      color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;
-    }
-    .meter-wrap {
-      position: relative; height: 24px; background: var(--surface);
-      border-radius: 6px; overflow: hidden; border: 1px solid var(--border);
-    }
-    #meter-canvas { display: block; width: 100%; height: 100%; background: transparent; }
-    .settings-toggle {
-      width: 100%; padding: 0.4rem; font-size: 0.8rem; font-weight: 500;
-      font-family: inherit; color: var(--text-secondary); background: transparent;
-      border: 1px dashed var(--border); border-radius: 6px; cursor: pointer; transition: color 0.2s, border-color 0.2s;
-    }
-    .settings-toggle:hover { color: var(--text); border-color: var(--border-hover); }
-    #advanced-controls {
-      display: none; flex-direction: column; gap: 0.625rem;
-      padding: 0.625rem; background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
-    }
-    #advanced-controls.visible { display: flex; }
-    .section-title {
-      font-size: 0.65rem; font-weight: 600; color: var(--text-muted);
-      text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 2px;
-    }
-    .control-group { display: flex; flex-direction: row; align-items: center; gap: 8px; }
-    .control-group label { width: 52px; flex-shrink: 0; font-size: 0.75rem; color: var(--text-secondary); }
-    .slider-val { width: 46px; text-align: right; font-size: 0.7rem; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--text); letter-spacing: -0.01em; white-space: nowrap; }
-    input[type="range"] {
-      width: 100%; height: 6px; -webkit-appearance: none; appearance: none;
-      background: var(--slider-track); border-radius: 3px; outline: none; cursor: pointer;
-    }
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none; width: 14px; height: 14px; background: var(--accent);
-      border-radius: 50%; border: 2px solid var(--slider-thumb-border); cursor: pointer; transition: background 0.2s;
-    }
-    input[type="range"]::-webkit-slider-thumb:hover { background: var(--accent-hover); }
-    input[type="range"]::-moz-range-thumb {
-      width: 14px; height: 14px; background: var(--accent); border-radius: 50%;
-      border: 2px solid var(--slider-thumb-border); cursor: pointer;
-    }
-    .reduction-badge {
-      visibility: hidden; display: flex; align-items: center; gap: 0.35rem;
-      font-size: 0.75rem; color: var(--danger); font-weight: 600;
-    }
-    .reduction-badge.visible { visibility: visible; }
-    .reduction-badge::before {
-      content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--danger); flex-shrink: 0;
-    }
-    .presets { display: flex; gap: 0.35rem; flex-wrap: wrap; }
-    .preset-btn {
-      padding: 0.25rem 0.5rem; font-size: 0.7rem; font-weight: 500; font-family: inherit;
-      color: var(--text-secondary); background: transparent; border: 1px solid var(--border); border-radius: 4px;
-      cursor: pointer; transition: color 0.2s, border-color 0.2s, background 0.2s;
-    }
-    .preset-btn:hover { color: var(--text); border-color: var(--border-hover); }
-    .preset-btn.active { color: var(--accent); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
-    .eq-slider-group { display: flex; flex-direction: column; gap: 4px; }
-    .divider { height: 1px; background: var(--border); border: none; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Easy Compressor</title>
+<style>
+:root{color-scheme:light dark;--bg:light-dark(#fff,#292a2d);--surface:light-dark(#f8f9fa,#35363a);--text:light-dark(#202124,#e8eaed);--text-secondary:light-dark(#5f6368,#9aa0a6);--text-muted:light-dark(#80868b,#80868b);--border:light-dark(#dadce0,#5f6368);--border-hover:light-dark(#bdc1c6,#7a7f85);--accent:light-dark(#1a73e8,#8ab4f8);--accent-hover:light-dark(#1765cc,#a8c7fa);--success:light-dark(#188038,#81c995);--danger:light-dark(#d93025,#f28b82);--dot-inactive:light-dark(#dadce0,#5f6368);--slider-track:light-dark(#dadce0,#5f6368);--slider-thumb-border:light-dark(#fff,#292a2d)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;width:300px;padding:.625rem;background:var(--bg);color:var(--text);font-size:.8125rem;-webkit-font-smoothing:antialiased;overflow:hidden}
+.container{display:flex;flex-direction:column;gap:.375rem}
+.header{display:flex;align-items:center;justify-content:space-between}
+.header-left{display:flex;align-items:center;gap:.5rem}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--dot-inactive);transition:background .3s,box-shadow .3s;flex-shrink:0}
+.status-dot.active{background:var(--success);box-shadow:0 0 6px color-mix(in srgb,var(--success) 60%,transparent)}
+.header h1{font-size:.8125rem;font-weight:700;letter-spacing:-.01em}
+.header-version{font-size:.65rem;color:var(--text-muted)}
+.vu-wrap{height:24px;background:var(--surface);border-radius:5px;overflow:hidden;border:1px solid var(--border)}
+#vu{display:block;width:100%;height:100%}
+.btn-row{display:flex;gap:6px}
+.btn-primary{flex:1;padding:.4rem .75rem;font-size:.8rem;font-weight:600;font-family:inherit;color:#fff;background:var(--accent);border:1px solid var(--accent);border-radius:6px;cursor:pointer;transition:background .2s,border-color .2s,transform .1s}
+.btn-primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
+.btn-primary:active{transform:scale(.98)}
+.btn-primary.active{background:transparent;border-color:var(--success);color:var(--success)}
+.btn-primary.active:hover{background:color-mix(in srgb,var(--success) 10%,transparent)}
+.btn-toggle{padding:.4rem .65rem;font-size:.75rem;font-weight:600;font-family:inherit;color:var(--text-secondary);background:transparent;border:1px solid var(--border);border-radius:6px;cursor:pointer;transition:color .2s,border-color .2s,background .2s;white-space:nowrap}
+.btn-toggle:hover{color:var(--text);border-color:var(--border-hover)}
+.btn-toggle.on{color:var(--accent);border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:.5rem .625rem}
+.panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.panel-title{font-size:.6rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em}
+.control-group{display:flex;flex-direction:column;gap:2px;margin-bottom:1px}
+.control-group:last-child{margin-bottom:0}
+.slider-header{display:flex;justify-content:space-between;align-items:center}
+.slider-header label{font-size:.7rem;color:var(--text-secondary)}
+.slider-header .val{font-size:.675rem;font-weight:600;font-variant-numeric:tabular-nums;color:var(--text);white-space:nowrap}
+input[type="range"]{width:100%;height:4px;-webkit-appearance:none;appearance:none;background:var(--slider-track);border-radius:2px;outline:none;cursor:pointer}
+input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;background:var(--accent);border-radius:50%;border:2px solid var(--slider-thumb-border);cursor:pointer;transition:background .2s}
+input[type="range"]::-webkit-slider-thumb:hover{background:var(--accent-hover)}
+input[type="range"]::-moz-range-thumb{width:12px;height:12px;background:var(--accent);border-radius:50%;border:2px solid var(--slider-thumb-border);cursor:pointer}
+.presets{display:flex;gap:4px;margin-bottom:6px}
+.preset-btn{padding:2px 7px;font-size:.65rem;font-weight:600;font-family:inherit;color:var(--text-secondary);background:transparent;border:1px solid var(--border);border-radius:4px;cursor:pointer;transition:color .2s,border-color .2s,background .2s}
+.preset-btn:hover{color:var(--text);border-color:var(--border-hover)}
+.preset-btn.active{color:var(--accent);border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.eq-section{display:block}
+.eq-section.hidden{display:none}
+.reduction-badge{visibility:hidden;display:flex;align-items:center;gap:.3rem;font-size:.7rem;color:var(--danger);font-weight:600}
+.reduction-badge.visible{visibility:visible}
+.reduction-badge::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--danger);flex-shrink:0}
+.meter-section{display:flex;flex-direction:column;gap:2px}
+.meter-labels{display:flex;justify-content:space-between;font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+</style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <div class="header-title">
-        <span class="status-dot" id="statusDot"></span>
-        <h1>Easy Compressor</h1>
-      </div>
-      <span class="header-version">v1.0</span>
+<div class="container">
+  <div class="header">
+    <div class="header-left">
+      <span class="status-dot" id="statusDot"></span>
+      <h1>Easy Compressor</h1>
     </div>
+    <span class="header-version">v1.0</span>
+  </div>
 
-    <p class="description">
-      Applies a dynamic range compressor and EQ to audio in the current tab.
-    </p>
-
-    <button id="compressButton" class="compress-button">
-      Enable Compressor
-    </button>
-
-    <div class="meter-section">
-      <div class="meter-labels">
-        <span>Level</span>
-        <span class="reduction-badge" id="reductionBadge">Gain reduction</span>
-      </div>
-      <div class="meter-wrap">
-        <canvas id="meter-canvas" width="268" height="24"></canvas>
-      </div>
+  <div class="meter-section">
+    <div class="meter-labels">
+      <span>Level</span>
+      <span class="reduction-badge" id="reductionBadge">Gain reduction</span>
     </div>
+    <div class="vu-wrap"><canvas id="vu" width="278" height="24"></canvas></div>
+  </div>
 
-    <button id="settingsButton" class="settings-toggle">⚙ Settings</button>
+  <div class="btn-row">
+    <button id="compressBtn" class="btn-primary">Enable Compressor</button>
+    <button id="eqToggle" class="btn-toggle on">EQ</button>
+  </div>
 
-    <div id="advanced-controls">
-      <div class="section-title">Equalizer</div>
-      <div class="presets" id="eqPresets">
-        <button class="preset-btn active" data-preset="flat">Flat</button>
-        <button class="preset-btn" data-preset="bass-boost">Bass Boost</button>
-        <button class="preset-btn" data-preset="voice">Voice</button>
-        <button class="preset-btn" data-preset="loudness">Loudness</button>
-      </div>
-      <div class="eq-slider-group">
-        <div class="control-group">
-          <label>Bass</label>
-          <input type="range" id="eq-bass" min="-12" max="12" value="0" step="1">
-          <span class="slider-val" id="eq-bass-value">0 dB</span>
-        </div>
-        <div class="control-group">
-          <label>Mid</label>
-          <input type="range" id="eq-mid" min="-12" max="12" value="0" step="1">
-          <span class="slider-val" id="eq-mid-value">0 dB</span>
-        </div>
-        <div class="control-group">
-          <label>Treble</label>
-          <input type="range" id="eq-treble" min="-12" max="12" value="0" step="1">
-          <span class="slider-val" id="eq-treble-value">0 dB</span>
-        </div>
-      </div>
-
-      <hr class="divider">
-
-      <div class="section-title">Compressor</div>
+  <div class="panel">
+    <div class="panel-title">Compressor</div>
+    <div class="s-group" id="compSliders">
       <div class="control-group">
-        <label>Threshold</label>
-        <input type="range" id="threshold-slider" min="-60" max="0" value="-30" step="1">
-        <span class="slider-val" id="threshold-value">-30 dB</span>
+        <div class="slider-header"><label>Threshold</label><span class="val" id="threshold-val">-30 dB</span></div>
+        <input type="range" id="threshold-sl" min="-60" max="0" value="-30" step="1">
       </div>
       <div class="control-group">
-        <label>Ratio</label>
-        <input type="range" id="ratio-slider" min="1" max="20" value="8" step="1">
-        <span class="slider-val" id="ratio-value">8:1</span>
+        <div class="slider-header"><label>Ratio</label><span class="val" id="ratio-val">8:1</span></div>
+        <input type="range" id="ratio-sl" min="1" max="20" value="8" step="1">
+      </div>
+      <div class="control-group">
+        <div class="slider-header"><label>Attack</label><span class="val" id="attack-val">3 ms</span></div>
+        <input type="range" id="attack-sl" min="0" max="200" value="3" step="1">
+      </div>
+      <div class="control-group">
+        <div class="slider-header"><label>Release</label><span class="val" id="release-val">250 ms</span></div>
+        <input type="range" id="release-sl" min="10" max="1000" value="250" step="10">
+      </div>
+      <div class="control-group">
+        <div class="slider-header"><label>Gain</label><span class="val" id="gain-val">0 dB</span></div>
+        <input type="range" id="gain-sl" min="0" max="24" value="0" step="1">
       </div>
     </div>
   </div>
-  <script src="popup.js"></script>
+
+  <div class="panel eq-section" id="eqSection">
+    <div class="panel-header">
+      <span class="panel-title">Equalizer</span>
+    </div>
+    <div class="presets" id="eqPresets">
+      <button class="preset-btn active" data-p="flat">Flat</button>
+      <button class="preset-btn" data-p="bass">Bass</button>
+      <button class="preset-btn" data-p="voice">Voice</button>
+      <button class="preset-btn" data-p="loud">Loud</button>
+    </div>
+    <div class="s-group">
+      <div class="control-group">
+        <div class="slider-header"><label>Bass</label><span class="val" id="eq-bass-val">0 dB</span></div>
+        <input type="range" id="eq-bass-sl" min="-12" max="12" value="0" step="1">
+      </div>
+      <div class="control-group">
+        <div class="slider-header"><label>Mid</label><span class="val" id="eq-mid-val">0 dB</span></div>
+        <input type="range" id="eq-mid-sl" min="-12" max="12" value="0" step="1">
+      </div>
+      <div class="control-group">
+        <div class="slider-header"><label>Treble</label><span class="val" id="eq-treble-val">0 dB</span></div>
+        <input type="range" id="eq-treble-sl" min="-12" max="12" value="0" step="1">
+      </div>
+    </div>
+  </div>
+</div>
+<script src="popup.js"></script>
 </body>
 </html>

@@ -1,6 +1,7 @@
 let audioContext = null;
 let source = null;
 let compressor = null;
+let makeupGain = null;
 let eqBass = null;
 let eqMid = null;
 let eqTreble = null;
@@ -19,41 +20,32 @@ function initializeAudio(element) {
 
         if (mediaElement !== element) {
             mediaElement = element;
-            if (source) {
-                source.disconnect();
-            }
+            if (source) source.disconnect();
             source = audioContext.createMediaElementSource(element);
         }
 
         if (!eqBass) {
             eqBass = audioContext.createBiquadFilter();
-            eqBass.type = 'lowshelf';
-            eqBass.frequency.value = 250;
-            eqBass.gain.value = 0;
+            eqBass.type = 'lowshelf'; eqBass.frequency.value = 250; eqBass.gain.value = 0;
         }
-
         if (!eqMid) {
             eqMid = audioContext.createBiquadFilter();
-            eqMid.type = 'peaking';
-            eqMid.frequency.value = 1000;
-            eqMid.Q.value = 0.7;
-            eqMid.gain.value = 0;
+            eqMid.type = 'peaking'; eqMid.frequency.value = 1000; eqMid.Q.value = 0.7; eqMid.gain.value = 0;
         }
-
         if (!eqTreble) {
             eqTreble = audioContext.createBiquadFilter();
-            eqTreble.type = 'highshelf';
-            eqTreble.frequency.value = 4000;
-            eqTreble.gain.value = 0;
+            eqTreble.type = 'highshelf'; eqTreble.frequency.value = 4000; eqTreble.gain.value = 0;
         }
 
         if (!compressor) {
             compressor = audioContext.createDynamicsCompressor();
-            compressor.threshold.value = -30;
-            compressor.knee.value = 40;
-            compressor.ratio.value = 8;
-            compressor.attack.value = 0.003;
-            compressor.release.value = 0.25;
+            compressor.threshold.value = -30; compressor.knee.value = 40; compressor.ratio.value = 8;
+            compressor.attack.value = 0.003; compressor.release.value = 0.25;
+        }
+
+        if (!makeupGain) {
+            makeupGain = audioContext.createGain();
+            makeupGain.gain.value = 1.0;
         }
 
         if (!analyser) {
@@ -77,6 +69,7 @@ function reconnectAudioGraph() {
     if (!source || !analyser || !gainNode) return;
     try {
         try { gainNode.disconnect(); } catch (e) {}
+        try { makeupGain.disconnect(); } catch (e) {}
         try { analyser.disconnect(); } catch (e) {}
         try { compressor.disconnect(); } catch (e) {}
         try { eqTreble.disconnect(); } catch (e) {}
@@ -84,26 +77,33 @@ function reconnectAudioGraph() {
         try { eqBass.disconnect(); } catch (e) {}
         try { source.disconnect(); } catch (e) {}
 
-        // source → eqBass → eqMid → eqTreble → [compressor] → analyser → gainNode → destination
         try { source.connect(eqBass); } catch (e) {}
         try { eqBass.connect(eqMid); } catch (e) {}
         try { eqMid.connect(eqTreble); } catch (e) {}
 
         if (isCompressorEnabled) {
             try { eqTreble.connect(compressor); } catch (e) {}
-            try { compressor.connect(analyser); } catch (e) {}
+            try { compressor.connect(makeupGain); } catch (e) {}
         } else {
-            try { eqTreble.connect(analyser); } catch (e) {}
+            try { eqTreble.connect(makeupGain); } catch (e) {}
         }
 
+        try { makeupGain.connect(analyser); } catch (e) {}
         try { analyser.connect(gainNode); } catch (e) {}
         try { gainNode.connect(audioContext.destination); } catch (e) {}
-    } catch (error) {
-    }
+    } catch (error) {}
 }
 
 function updateCompressor(state) {
     if (!compressor || !source || !gainNode) return;
+
+    if (state.eq) applyEQ(state.eq);
+
+    if (state.threshold !== undefined) compressor.threshold.value = parseFloat(state.threshold);
+    if (state.ratio !== undefined) compressor.ratio.value = parseFloat(state.ratio);
+    if (state.attack !== undefined) compressor.attack.value = parseFloat(state.attack) / 1000;
+    if (state.release !== undefined) compressor.release.value = parseFloat(state.release) / 1000;
+    if (state.gain !== undefined) makeupGain.gain.value = Math.max(1, 1 + parseFloat(state.gain) / 20);
 
     const fadeTime = 0.05;
     try {
@@ -111,8 +111,6 @@ function updateCompressor(state) {
             clearTimeout(pendingUpdate);
             pendingUpdate = null;
         }
-
-        applyEQ(state.eq);
 
         const now = audioContext.currentTime;
         gainNode.gain.cancelScheduledValues(now);
@@ -129,11 +127,6 @@ function updateCompressor(state) {
             } else if (!shouldBeActive && isCompressorEnabled) {
                 isCompressorEnabled = false;
                 reconnectAudioGraph();
-            }
-
-            if (shouldBeActive) {
-                if (state.threshold !== undefined) compressor.threshold.value = parseFloat(state.threshold);
-                if (state.ratio !== undefined) compressor.ratio.value = parseFloat(state.ratio);
             }
 
             const after = audioContext.currentTime;
@@ -157,10 +150,8 @@ function applyEQ(eq) {
 function setupAudioProcessing() {
     const mediaElements = document.querySelectorAll('video, audio');
     if (mediaElements.length === 0) return;
-
     const element = mediaElements[0];
     if (!element.src && !element.querySelector('source')) return;
-
     initializeAudio(element);
 }
 
@@ -194,17 +185,13 @@ function startMeter() {
 }
 
 function trySetup() {
-    if (!audioContext) {
-        setupAudioProcessing();
-    }
+    if (!audioContext) setupAudioProcessing();
 }
 
 setTimeout(trySetup, 1000);
 
 const setupObserver = new MutationObserver(() => {
-    if (!audioContext && document.querySelector('video, audio')) {
-        setupAudioProcessing();
-    }
+    if (!audioContext && document.querySelector('video, audio')) setupAudioProcessing();
 });
 if (document.body) {
     setupObserver.observe(document.body, { childList: true, subtree: true });
