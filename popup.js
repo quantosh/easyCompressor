@@ -20,7 +20,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusDot = document.getElementById('statusDot');
     const reductionBadge = document.getElementById('reductionBadge');
     const gearBtn = document.getElementById('gearBtn');
-    const settingsMenu = document.getElementById('settingsMenu');
+    const backBtn = document.getElementById('backBtn');
+    const viewMain = document.getElementById('viewMain');
+    const viewSettings = document.getElementById('viewSettings');
     const modeToggle = document.getElementById('modeToggle');
 
     const enableBtnBasic = document.getElementById('enableBtnBasic');
@@ -84,9 +86,15 @@ document.addEventListener('DOMContentLoaded', () => {
     enableBtnBasic.addEventListener('click', () => doEnable(!compressorOn));
     enableBtnAdv.addEventListener('click', () => doEnable(!compressorOn));
 
-    // Gear menu
+    // Gear → Settings view
     gearBtn.addEventListener('click', () => {
-        settingsMenu.classList.toggle('visible');
+        viewMain.classList.add('hidden');
+        viewSettings.classList.add('visible');
+    });
+
+    backBtn.addEventListener('click', () => {
+        viewSettings.classList.remove('visible');
+        viewMain.classList.remove('hidden');
     });
 
     // Mode toggle
@@ -94,7 +102,6 @@ document.addEventListener('DOMContentLoaded', () => {
         root.classList.toggle('mode-advanced', modeToggle.checked);
         root.classList.toggle('mode-basic', !modeToggle.checked);
         chrome.runtime.sendMessage({ action: 'setMode', mode: modeToggle.checked ? 'advanced' : 'basic' }).catch(() => {});
-        settingsMenu.classList.remove('visible');
     });
 
     // Intensity (basic mode)
@@ -111,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // EQ visibility toggle (advanced mode)
     eqToggle.addEventListener('click', () => {
         const vis = eqSection.classList.contains('hidden');
-        eqSection.classList.toggle('hidden', !vis);
+        eqSection.classList.toggle('hidden', vis);
         eqToggle.classList.toggle('on', !vis);
     });
 
