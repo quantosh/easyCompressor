@@ -104,12 +104,12 @@ input[type="range"]::-moz-range-thumb{width:12px;height:12px;background:var(--ac
 .about-card .text-center{text-align:center}
 .about-card .about-icon{width:48px;height:48px;margin:0 auto 8px;display:block}
 .about-card h2{font-size:1rem;font-weight:700;color:var(--text)}
-.about-card h2 .about-version{font-size:.75rem;color:var(--success);font-weight:600;margin-left:4px}
+.about-card h2 .about-version{font-size:.75rem;color:var(--accent);font-weight:600;margin-left:4px}
 .about-card hr{margin:12px 0;border:none;height:1px;background:var(--border)}
 .about-card p{font-size:.7rem;color:var(--text-secondary);line-height:1.5}
-.about-card .about-link{color:var(--success);font-weight:600;text-decoration:none}
+.about-card .about-link{color:var(--accent);font-weight:600;text-decoration:none}
 .about-card .about-link:hover{text-decoration:underline}
-.about-card .about-btn{width:100%;margin-top:12px;background:var(--success);color:#fff;padding:8px;border:none;border-radius:12px;font-size:.8rem;font-weight:600;font-family:inherit;cursor:pointer;transition:filter .2s}
+.about-card .about-btn{width:100%;margin-top:12px;background:var(--accent);color:#fff;padding:8px;border:none;border-radius:12px;font-size:.8rem;font-weight:600;font-family:inherit;cursor:pointer;transition:filter .2s}
 .about-card .about-btn:hover{filter:brightness(1.1)}
 
 /* FOOTER */
