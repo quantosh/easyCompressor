@@ -1,3 +1,5 @@
 _staging/
 Easy.Compressor-*/
 *.zip
+*.crx
+*.pem
