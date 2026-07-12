@@ -53,8 +53,6 @@ body{font-family:system-ui,-apple-system,sans-serif;width:300px;padding:.625rem;
 .intensity-wrap input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;background:var(--accent);border-radius:50%;border:2px solid var(--slider-thumb-border);cursor:pointer}
 .intensity-wrap input[type="range"]::-moz-range-thumb{width:14px;height:14px;background:var(--accent);border-radius:50%;border:2px solid var(--slider-thumb-border);cursor:pointer}
 .intensity-ticks{display:flex;justify-content:space-between;font-size:.6rem;color:var(--text-muted)}
-.simple-status{font-size:.675rem;color:var(--text-secondary);text-align:center;min-height:1.2em}
-.simple-status.on{color:var(--success);font-weight:600}
 
 /* ADVANCED MODE */
 .btn-row{display:flex;gap:6px}

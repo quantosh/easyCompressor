@@ -34,7 +34,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const presetBtns = document.querySelectorAll('[data-p]');
     const intensitySlider = document.getElementById('intensitySlider');
     const intensityVal = document.getElementById('intensityVal');
-    const simpleStatus = document.getElementById('simpleStatus');
 
     let compressorOn = false;
     let isCustomPreset = false;
@@ -72,12 +71,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const p = INTENSITY_PRESETS[v];
                 sendState({ enabled: true, threshold: p.threshold, ratio: p.ratio,
                     attack: p.attack, release: p.release, gain: p.gain });
-                simpleStatus.textContent = '';
-                simpleStatus.className = 'simple-status';
             } else {
                 sendState({ enabled: false });
-                simpleStatus.textContent = '';
-                simpleStatus.className = 'simple-status';
             }
         }
     }
@@ -119,8 +114,6 @@ document.addEventListener('DOMContentLoaded', () => {
         root.classList.remove('mode-advanced');
         root.classList.add('mode-basic');
         setOnState(false);
-        simpleStatus.textContent = '';
-        simpleStatus.className = 'simple-status';
         intensitySlider.value = 2;
         intensityVal.textContent = 'Medium';
 
@@ -279,8 +272,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 else if (t >= -25) iv = 1;
                 intensitySlider.value = iv;
                 intensityVal.textContent = INTENSITY_PRESETS[iv].label;
-                simpleStatus.textContent = '';
-                simpleStatus.className = 'simple-status';
             }
         });
     }
