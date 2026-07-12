@@ -165,7 +165,10 @@ function setupAudioProcessing() {
     const mediaElements = document.querySelectorAll('video, audio');
     if (mediaElements.length === 0) return;
     const element = mediaElements[0];
-    if (!element.src && !element.querySelector('source')) return;
+    if (!element.src && !element.querySelector('source')) {
+        element.addEventListener('loadedmetadata', () => initializeAudio(element), { once: true });
+        return;
+    }
     initializeAudio(element);
 }
 
@@ -183,6 +186,9 @@ function startMeter() {
     if (!analyser) return;
     if (animationFrameId) return;
     function updateMeter() {
+        if (audioContext && audioContext.state === 'suspended') {
+            audioContext.resume().catch(() => {});
+        }
         const dataArray = new Uint8Array(analyser.frequencyBinCount);
         analyser.getByteTimeDomainData(dataArray);
         let sum = 0;
