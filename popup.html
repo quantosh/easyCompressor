@@ -6,39 +6,21 @@
   <title>Easy Compressor</title>
   <style>
     :root {
-      --bg: #0f1117;
-      --surface: #161b22;
-      --text: #e1e4e8;
-      --text-secondary: #8b949e;
-      --text-muted: #586069;
-      --border: #21262d;
-      --border-hover: #30363d;
-      --accent: #1f6feb;
-      --accent-hover: #388bfd;
-      --success: #38a169;
-      --danger: #f56565;
-      --dot-inactive: #4a5568;
-      --slider-track: #21262d;
-      --slider-thumb-border: #0f1117;
-    }
-
-    @media (prefers-color-scheme: light) {
-      :root {
-        --bg: #ffffff;
-        --surface: #f0f2f5;
-        --text: #1a1a2e;
-        --text-secondary: #656d76;
-        --text-muted: #586069;
-        --border: #d0d7de;
-        --border-hover: #b0b8c0;
-        --accent: #1f6feb;
-        --accent-hover: #388bfd;
-        --success: #2d8a4e;
-        --danger: #e5534b;
-        --dot-inactive: #d0d7de;
-        --slider-track: #d0d7de;
-        --slider-thumb-border: #ffffff;
-      }
+      color-scheme: light dark;
+      --bg: light-dark(#ffffff, #292a2d);
+      --surface: light-dark(#f8f9fa, #35363a);
+      --text: light-dark(#202124, #e8eaed);
+      --text-secondary: light-dark(#5f6368, #9aa0a6);
+      --text-muted: light-dark(#80868b, #80868b);
+      --border: light-dark(#dadce0, #5f6368);
+      --border-hover: light-dark(#bdc1c6, #7a7f85);
+      --accent: light-dark(#1a73e8, #8ab4f8);
+      --accent-hover: light-dark(#1765cc, #a8c7fa);
+      --success: light-dark(#188038, #81c995);
+      --danger: light-dark(#d93025, #f28b82);
+      --dot-inactive: light-dark(#dadce0, #5f6368);
+      --slider-track: light-dark(#dadce0, #5f6368);
+      --slider-thumb-border: light-dark(#ffffff, #292a2d);
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
