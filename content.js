@@ -169,9 +169,12 @@ function setupAudioProcessing() {
     initializeAudio(element);
 }
 
-chrome.runtime.onMessage.addListener((request) => {
+chrome.runtime.onMessage.addListener(async (request) => {
     if (request.action === 'updateState') {
         setupAudioProcessing();
+        if (audioContext && audioContext.state === 'suspended') {
+            try { await audioContext.resume(); } catch (e) {}
+        }
         updateCompressor(request);
     }
 });

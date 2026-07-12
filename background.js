@@ -8,7 +8,7 @@ let compressorState = {
 };
 
 let eqState = {
-    enabled: true,
+    enabled: false,
     bass: 0,
     mid: 0,
     treble: 0

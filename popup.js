@@ -270,7 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 if (found) { presetBtns.forEach(p => p.classList.toggle('active', p.dataset.p === found)); isCustomPreset = false; }
                 else { presetBtns.forEach(p => p.classList.remove('active')); isCustomPreset = true; }
-                eqEnableToggle.checked = eq.enabled !== false;
+                eqEnableToggle.checked = eq.enabled === true;
                 eqSection.classList.toggle('hidden', eq.enabled === false);
             } else {
                 const t = bg.threshold;
