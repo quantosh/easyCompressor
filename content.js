@@ -201,7 +201,7 @@ function startMeter() {
         if (compressor && isCompressorEnabled) {
             reduction = compressor.reduction || 0;
         }
-        chrome.runtime.sendMessage({ action: "audioLevel", level: rms, reduction });
+        try { chrome.runtime.sendMessage({ action: "audioLevel", level: rms, reduction }); } catch (e) {}
         animationFrameId = requestAnimationFrame(updateMeter);
     }
     updateMeter();

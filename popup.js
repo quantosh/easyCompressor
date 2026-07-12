@@ -182,12 +182,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }));
 
     function syncEQView(bass, mid, treble) {
-        document.getElementById('eq-bass-val').textContent = fmtDB(bass);
-        document.getElementById('eq-mid-val').textContent = fmtDB(mid);
-        document.getElementById('eq-treble-val').textContent = fmtDB(treble);
-        document.getElementById('eq-bass-sl').value = bass;
-        document.getElementById('eq-mid-sl').value = mid;
-        document.getElementById('eq-treble-sl').value = treble;
+        const el1 = document.getElementById('eq-bass-val'); if (el1) el1.textContent = fmtDB(bass);
+        const el2 = document.getElementById('eq-mid-val'); if (el2) el2.textContent = fmtDB(mid);
+        const el3 = document.getElementById('eq-treble-val'); if (el3) el3.textContent = fmtDB(treble);
+        const el4 = document.getElementById('eq-bass-sl'); if (el4) el4.value = bass;
+        const el5 = document.getElementById('eq-mid-sl'); if (el5) el5.value = mid;
+        const el6 = document.getElementById('eq-treble-sl'); if (el6) el6.value = treble;
     }
 
     function fmtDB(v) { return `${v > 0 ? '+' : ''}${v} dB`; }
