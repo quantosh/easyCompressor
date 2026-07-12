@@ -88,10 +88,14 @@ document.addEventListener('DOMContentLoaded', () => {
     enableBtnBasic.addEventListener('click', () => doEnable(!compressorOn));
     enableBtnAdv.addEventListener('click', () => doEnable(!compressorOn));
 
-    // Gear → Settings view
+    // Gear → toggle Settings view
     gearBtn.addEventListener('click', () => {
-        viewMain.classList.add('hidden');
-        viewSettings.classList.add('visible');
+        if (viewSettings.classList.contains('visible')) {
+            closeSettings();
+        } else {
+            viewMain.classList.add('hidden');
+            viewSettings.classList.add('visible');
+        }
     });
 
     backBtn.addEventListener('click', closeSettings);
