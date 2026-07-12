@@ -71,10 +71,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const v = parseInt(intensitySlider.value);
                 const p = INTENSITY_PRESETS[v];
                 sendState({ enabled: true, threshold: p.threshold, ratio: p.ratio,
-                    attack: p.attack, release: p.release, gain: p.gain,
-                    bass: 0, mid: 0, treble: 0, eqEnabled: false });
-                simpleStatus.textContent = 'Leveling active';
-                simpleStatus.className = 'simple-status on';
+                    attack: p.attack, release: p.release, gain: p.gain });
+                simpleStatus.textContent = '';
+                simpleStatus.className = 'simple-status';
             } else {
                 sendState({ enabled: false });
                 simpleStatus.textContent = '';
@@ -280,8 +279,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 else if (t >= -25) iv = 1;
                 intensitySlider.value = iv;
                 intensityVal.textContent = INTENSITY_PRESETS[iv].label;
-                simpleStatus.textContent = bg.active ? 'Leveling active' : '';
-                simpleStatus.className = bg.active ? 'simple-status on' : 'simple-status';
+                simpleStatus.textContent = '';
+                simpleStatus.className = 'simple-status';
             }
         });
     }

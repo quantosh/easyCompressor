@@ -114,33 +114,34 @@
         </div>
       </div>
 
-      <div class="panel eq-section hidden" id="eqSection">
-        <div class="panel-header">
-          <span class="panel-title">Equalizer</span>
+    </div>
+
+    <div class="panel eq-section hidden" id="eqSection">
+      <div class="panel-header">
+        <span class="panel-title">Equalizer</span>
+      </div>
+      <div class="presets" id="eqPresets">
+        <button class="preset-btn active" data-p="flat">Flat</button>
+        <button class="preset-btn" data-p="bass">Bass</button>
+        <button class="preset-btn" data-p="voice">Voice</button>
+        <button class="preset-btn" data-p="loud">Loud</button>
+      </div>
+      <div class="s-group">
+        <div class="control-group">
+          <div class="slider-header"><label>Bass</label><span class="val" id="eq-bass-val">0 dB</span></div>
+          <input type="range" id="eq-bass-sl" min="-12" max="12" value="0" step="1">
         </div>
-        <div class="presets" id="eqPresets">
-          <button class="preset-btn active" data-p="flat">Flat</button>
-          <button class="preset-btn" data-p="bass">Bass</button>
-          <button class="preset-btn" data-p="voice">Voice</button>
-          <button class="preset-btn" data-p="loud">Loud</button>
+        <div class="control-group">
+          <div class="slider-header"><label>Mid</label><span class="val" id="eq-mid-val">0 dB</span></div>
+          <input type="range" id="eq-mid-sl" min="-12" max="12" value="0" step="1">
         </div>
-        <div class="s-group">
-          <div class="control-group">
-            <div class="slider-header"><label>Bass</label><span class="val" id="eq-bass-val">0 dB</span></div>
-            <input type="range" id="eq-bass-sl" min="-12" max="12" value="0" step="1">
-          </div>
-          <div class="control-group">
-            <div class="slider-header"><label>Mid</label><span class="val" id="eq-mid-val">0 dB</span></div>
-            <input type="range" id="eq-mid-sl" min="-12" max="12" value="0" step="1">
-          </div>
-          <div class="control-group">
-            <div class="slider-header"><label>Treble</label><span class="val" id="eq-treble-val">0 dB</span></div>
-            <input type="range" id="eq-treble-sl" min="-12" max="12" value="0" step="1">
-          </div>
+        <div class="control-group">
+          <div class="slider-header"><label>Treble</label><span class="val" id="eq-treble-val">0 dB</span></div>
+          <input type="range" id="eq-treble-sl" min="-12" max="12" value="0" step="1">
+        </div>
+      </div>
+    </div>
   </div>
-</div>
-  </div>
-</div>
 <script src="popup.js"></script>
 </body>
 </html>
