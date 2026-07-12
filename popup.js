@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const viewSettings = document.getElementById('viewSettings');
     const backBtn = document.getElementById('backBtn');
     const settingsCloseBtn = document.getElementById('settingsCloseBtn');
+    const resetBtn = document.getElementById('resetBtn');
     const modeToggle = document.getElementById('modeToggle');
 
     const enableBtnBasic = document.getElementById('enableBtnBasic');
@@ -99,6 +100,47 @@ document.addEventListener('DOMContentLoaded', () => {
     function closeSettings() {
         viewSettings.classList.remove('visible');
         viewMain.classList.remove('hidden');
+    }
+
+    resetBtn.addEventListener('click', resetSettings);
+
+    function resetSettings() {
+        // Defaults
+        const defaults = { enabled: false, threshold: -30, ratio: 8, attack: 3, release: 250, gain: 0,
+            bass: 0, mid: 0, treble: 0, eqEnabled: true };
+
+        sendState(defaults);
+        chrome.runtime.sendMessage({ action: 'setMode', mode: 'basic' }).catch(() => {});
+
+        // Update UI
+        modeToggle.checked = false;
+        root.classList.remove('mode-advanced');
+        root.classList.add('mode-basic');
+        setOnState(false);
+        simpleStatus.textContent = '';
+        simpleStatus.className = 'simple-status';
+        intensitySlider.value = 2;
+        intensityVal.textContent = 'Medium';
+
+        // Reset advanced sliders
+        ['threshold', 'ratio', 'attack', 'release', 'gain'].forEach(key => {
+            const sl = document.getElementById(`${key}-sl`);
+            const vl = document.getElementById(`${key}-val`);
+            const defs = { threshold: -30, ratio: 8, attack: 3, release: 250, gain: 0 };
+            if (sl) sl.value = defs[key];
+            if (vl) vl.textContent = key === 'ratio' ? `${defs[key]}:1` : (key === 'attack' || key === 'release' ? `${defs[key]} ms` : `${defs[key]} dB`);
+        });
+
+        // Reset EQ
+        syncEQView(0, 0, 0);
+        presetBtns.forEach(p => p.classList.remove('active'));
+        document.querySelector('[data-p="flat"]')?.classList.add('active');
+        isCustomPreset = false;
+        eqEnableToggle.checked = true;
+        eqToggle.classList.add('on');
+        eqSection.classList.remove('hidden');
+
+        closeSettings();
     }
 
     // Mode toggle
