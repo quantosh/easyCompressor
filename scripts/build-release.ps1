@@ -1,6 +1,3 @@
-# build-release.ps1
-# Usage: .\build-release.ps1 chrome|edge|firefox
-
 param(
     [Parameter(Mandatory=$true)]
     [ValidateSet("chrome", "edge", "firefox")]
@@ -21,15 +18,19 @@ if (!(Test-Path $manifest)) {
 
 Copy-Item $manifest $dest -Force
 
-$itemsToExclude = @("*.zip", "build-release.ps1", "manifest.chrome.json", "manifest.edge.json", "manifest.firefox.json")
-$itemsToCompress = Get-ChildItem -Path $repoRoot -Recurse | Where-Object { 
-    $_.Name -notin $itemsToExclude -and $_.FullName -notmatch "manifest.json"
+$filesToInclude = @(
+    "manifest.json",
+    "background.js",
+    "content.js",
+    "popup.html",
+    "popup.js"
+) + (Get-ChildItem -Path (Join-Path $repoRoot "images") -Filter "*.png" | ForEach-Object { $_.Name } | ForEach-Object { "images/$_" })
+
+if (Test-Path $destinationPath) {
+    Remove-Item $destinationPath
 }
 
-if (Test-Path $destinationPath) { 
-    Remove-Item $destinationPath 
-}
-
-Compress-Archive -Path $itemsToCompress.FullName -DestinationPath $destinationPath -CompressionLevel Optimal
+$fullPaths = $filesToInclude | ForEach-Object { Join-Path $repoRoot $_ }
+Compress-Archive -Path $fullPaths -DestinationPath $destinationPath -CompressionLevel Optimal
 
 Write-Host "Release package created: $destinationPath"

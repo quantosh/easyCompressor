@@ -30,32 +30,19 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         sendResponse(compressorState);
         return true;
     } else if (request.action === "audioLevel") {
-        // Reenviar el nivel de audio al popup (todas las ventanas del popup abiertas)
-        chrome.windows.getAll({populate:true}, function(windows) {
-            windows.forEach(function(win) {
-                win.tabs.forEach(function(tab) {
-                    if (tab.url && tab.url.includes('popup.html')) {
-                        chrome.tabs.sendMessage(tab.id, { action: "audioLevel", level: request.level }).catch(()=>{});
-                    }
-                });
-            });
-        });
+        // Reenviar el nivel de audio al popup (si está abierto)
+        chrome.runtime.sendMessage({ action: "audioLevel", level: request.level, reduction: request.reduction }).catch(() => {});
     }
 });
 
-// Función para inyectar el script y enviar la configuración a la pestaña activa
+// Función para enviar la configuración a la pestaña activa
 function updateActiveTab() {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         if (tabs[0]) {
-            chrome.scripting.executeScript({
-                target: { tabId: tabs[0].id },
-                files: ['content.js']
-            }).then(() => {
-                chrome.tabs.sendMessage(tabs[0].id, {
-                    action: "updateState",
-                    ...compressorState
-                }).catch(err => console.error("Error al enviar mensaje a la pestaña activa:", err));
-            }).catch(err => console.error("Error al inyectar script en la pestaña activa:", err));
+            chrome.tabs.sendMessage(tabs[0].id, {
+                action: "updateState",
+                ...compressorState
+            }).catch(err => console.error("Error al enviar mensaje a la pestaña activa:", err));
         }
     });
 }

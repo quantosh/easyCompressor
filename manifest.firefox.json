@@ -3,7 +3,7 @@
   "name": "Easy Compressor",
   "version": "1.0",
   "description": "Easy way to apply a dynamic compressor to audio in browser.",
-  "permissions": ["scripting", "tabs", "activeTab"],
+  "permissions": ["tabs", "activeTab"],
   "host_permissions": ["<all_urls>"],
   "action": {
     "default_popup": "popup.html",

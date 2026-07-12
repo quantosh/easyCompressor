@@ -7,6 +7,7 @@ let gainNode = null;
 let mediaElement = null;
 let isCompressorEnabled = false;
 let animationFrameId = null;
+let pendingUpdate = null;
 
 function initializeAudio(element) {
     try {
@@ -77,32 +78,37 @@ function reconnectAudioGraph() {
 function updateCompressor(state) {
     if (!compressor || !source || !gainNode) return;
 
-    const fadeTime = 0.05; // 50ms
+    const fadeTime = 0.05;
     try {
+        if (pendingUpdate) {
+            clearTimeout(pendingUpdate);
+            pendingUpdate = null;
+        }
+
         const now = audioContext.currentTime;
-        // Fade out
         gainNode.gain.cancelScheduledValues(now);
         gainNode.gain.setValueAtTime(gainNode.gain.value, now);
-        gainNode.gain.linearRampToValueAtTime(0.0, now + fadeTime);
+        gainNode.gain.linearRampToValueAtTime(0.001, now + fadeTime);
 
-        setTimeout(() => {
-            if (state.active && !isCompressorEnabled) {
+        pendingUpdate = setTimeout(() => {
+            pendingUpdate = null;
+            const shouldBeActive = state.active;
+
+            if (shouldBeActive && !isCompressorEnabled) {
                 isCompressorEnabled = true;
                 reconnectAudioGraph();
-            } else if (!state.active && isCompressorEnabled) {
+            } else if (!shouldBeActive && isCompressorEnabled) {
                 isCompressorEnabled = false;
                 reconnectAudioGraph();
             }
 
-            if (state.active) {
+            if (shouldBeActive) {
                 if (state.threshold !== undefined) compressor.threshold.value = parseFloat(state.threshold);
                 if (state.ratio !== undefined) compressor.ratio.value = parseFloat(state.ratio);
             }
 
-            // Fade in
             const after = audioContext.currentTime;
-            gainNode.gain.cancelScheduledValues(after);
-            gainNode.gain.setValueAtTime(0.0, after);
+            gainNode.gain.setValueAtTime(0.001, after);
             gainNode.gain.linearRampToValueAtTime(1.0, after + fadeTime);
         }, fadeTime * 1000);
     } catch (error) {
@@ -152,5 +158,25 @@ function startMeter() {
     updateMeter();
 }
 
-// Configuración inicial cuando se carga la página
-setTimeout(setupAudioProcessing, 1000);
+// Intenta inicializar al cargar la página
+function trySetup() {
+    if (!audioContext) {
+        setupAudioProcessing();
+    }
+}
+
+setTimeout(trySetup, 1000);
+
+// Observa cambios en el DOM para detectar elementos multimedia agregados dinámicamente
+const setupObserver = new MutationObserver(() => {
+    if (!audioContext && document.querySelector('video, audio')) {
+        setupAudioProcessing();
+    }
+});
+if (document.body) {
+    setupObserver.observe(document.body, { childList: true, subtree: true });
+} else {
+    document.addEventListener('DOMContentLoaded', () => {
+        setupObserver.observe(document.body, { childList: true, subtree: true });
+    });
+}
