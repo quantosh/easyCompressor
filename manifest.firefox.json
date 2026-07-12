@@ -30,7 +30,8 @@
   },
   "browser_specific_settings": {
     "gecko": {
-      "id": "easycompressor@tudominio.com"
+      "id": "easycompressor@tudominio.com",
+      "data_collection_permissions": []
     }
   }
 }
