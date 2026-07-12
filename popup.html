@@ -58,11 +58,13 @@
 
   <!-- MAIN VIEW -->
   <div class="view-main" id="viewMain">
-    <div class="meter-labels">
-      <span>Level</span>
-      <span class="reduction-badge" id="reductionBadge">Gain reduction</span>
+    <div class="meter-group">
+      <div class="meter-labels">
+        <span>Level</span>
+        <span class="reduction-badge" id="reductionBadge">Gain reduction</span>
+      </div>
+      <div class="vu-wrap"><canvas id="vu" width="278"></canvas></div>
     </div>
-    <div class="vu-wrap"><canvas id="vu" width="278"></canvas></div>
 
     <!-- BASIC MODE -->
     <div class="mode-basic-only">
