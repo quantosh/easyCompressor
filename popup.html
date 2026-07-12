@@ -103,15 +103,9 @@ input[type="range"]::-moz-range-thumb{width:12px;height:12px;background:var(--ac
 .toggle-md input:checked+.track{background:var(--accent)}
 .toggle-md input:checked~.thumb{left:18px}
 
-/* View switching */
-.view-main{display:flex;flex-direction:column;gap:.5rem}
-.view-main.hidden{display:none}
-.view-settings{display:none;flex-direction:column;gap:.5rem}
-.view-settings.visible{display:flex}
-.view-header{display:flex;align-items:center;gap:.5rem;margin-bottom:2px}
-.view-header .back-btn{background:none;border:none;font-size:1rem;cursor:pointer;padding:0;color:var(--accent);line-height:1;transition:color .2s}
-.view-header .back-btn:hover{color:var(--accent-hover)}
-.view-header span{font-size:.8rem;font-weight:600;color:var(--text)}
+/* Settings popover */
+.settings-menu{display:none;flex-direction:column;position:relative;z-index:2}
+.settings-menu.visible{display:flex}
 .menu-credits{font-size:.65rem;color:var(--text-muted);text-align:center;line-height:1.5;padding-top:8px;border-top:1px solid var(--border)}
 </style>
 </head>
@@ -124,16 +118,12 @@ input[type="range"]::-moz-range-thumb{width:12px;height:12px;background:var(--ac
     </div>
     <div class="header-right">
       <span class="header-version">v1.0</span>
-      <button class="gear-btn" id="gearBtn" title="Settings">⚙</button>
+      <button class="btn-toggle" id="gearBtn">⚙ Settings</button>
     </div>
   </div>
 
-  <!-- SETTINGS VIEW -->
-  <div class="view-settings" id="viewSettings">
-    <div class="view-header">
-      <button class="back-btn" id="backBtn">←</button>
-      <span>Settings</span>
-    </div>
+  <!-- SETTINGS POPOVER -->
+  <div class="settings-menu" id="settingsMenu">
     <div class="panel">
       <div class="menu-row">
         <label>Advanced Mode</label>
@@ -149,8 +139,8 @@ input[type="range"]::-moz-range-thumb{width:12px;height:12px;background:var(--ac
     </div>
   </div>
 
-  <!-- MAIN VIEW -->
-  <div class="view-main" id="viewMain">
+  <!-- MAIN CONTENT -->
+  <div id="mainContent">
     <div class="meter-labels">
       <span>Level</span>
       <span class="reduction-badge" id="reductionBadge">Gain reduction</span>
@@ -236,9 +226,8 @@ input[type="range"]::-moz-range-thumb{width:12px;height:12px;background:var(--ac
             <div class="slider-header"><label>Treble</label><span class="val" id="eq-treble-val">0 dB</span></div>
             <input type="range" id="eq-treble-sl" min="-12" max="12" value="0" step="1">
           </div>
-        </div>
-      </div>
-    </div>
+  </div>
+</div>
   </div>
 </div>
 <script src="popup.js"></script>

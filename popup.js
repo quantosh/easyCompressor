@@ -20,9 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusDot = document.getElementById('statusDot');
     const reductionBadge = document.getElementById('reductionBadge');
     const gearBtn = document.getElementById('gearBtn');
-    const backBtn = document.getElementById('backBtn');
-    const viewMain = document.getElementById('viewMain');
-    const viewSettings = document.getElementById('viewSettings');
+    const settingsMenu = document.getElementById('settingsMenu');
     const modeToggle = document.getElementById('modeToggle');
 
     const enableBtnBasic = document.getElementById('enableBtnBasic');
@@ -86,15 +84,9 @@ document.addEventListener('DOMContentLoaded', () => {
     enableBtnBasic.addEventListener('click', () => doEnable(!compressorOn));
     enableBtnAdv.addEventListener('click', () => doEnable(!compressorOn));
 
-    // Gear → Settings view
+    // Gear → popover
     gearBtn.addEventListener('click', () => {
-        viewMain.classList.add('hidden');
-        viewSettings.classList.add('visible');
-    });
-
-    backBtn.addEventListener('click', () => {
-        viewSettings.classList.remove('visible');
-        viewMain.classList.remove('hidden');
+        settingsMenu.classList.toggle('visible');
     });
 
     // Mode toggle
