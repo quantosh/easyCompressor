@@ -5,18 +5,20 @@ param(
 )
 
 $repoRoot = Get-Location
-
-$manifest = "manifest.$target.json"
-$dest = "manifest.json"
 $zipName = "Easy.Compressor-$target.zip"
 $destinationPath = Join-Path $repoRoot $zipName
 
-if (!(Test-Path $manifest)) {
-    Write-Error "No manifest found for $target ($manifest)"
-    exit 1
+# Firefox necesita su manifest específico, Chrome/Edge usan manifest.json directo
+if ($target -eq "firefox") {
+    $firefoxManifest = Join-Path $repoRoot "manifest.firefox.json"
+    if (!(Test-Path $firefoxManifest)) {
+        Write-Error "No manifest found for Firefox (manifest.firefox.json)"
+        exit 1
+    }
+    $backup = Join-Path $repoRoot "manifest.json.bak"
+    Copy-Item (Join-Path $repoRoot "manifest.json") $backup -Force
+    Copy-Item $firefoxManifest (Join-Path $repoRoot "manifest.json") -Force
 }
-
-Copy-Item $manifest $dest -Force
 
 $filesToInclude = @(
     "manifest.json",
@@ -32,5 +34,13 @@ if (Test-Path $destinationPath) {
 
 $fullPaths = $filesToInclude | ForEach-Object { Join-Path $repoRoot $_ }
 Compress-Archive -Path $fullPaths -DestinationPath $destinationPath -CompressionLevel Optimal
+
+# Restaurar manifest.json original después del build de Firefox
+if ($target -eq "firefox") {
+    $backup = Join-Path $repoRoot "manifest.json.bak"
+    if (Test-Path $backup) {
+        Move-Item $backup (Join-Path $repoRoot "manifest.json") -Force
+    }
+}
 
 Write-Host "Release package created: $destinationPath"
