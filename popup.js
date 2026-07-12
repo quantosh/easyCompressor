@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const presetBtns = document.querySelectorAll('[data-p]');
     const intensitySlider = document.getElementById('intensitySlider');
     const intensityVal = document.getElementById('intensityVal');
-    const tooltipBox = document.getElementById('tooltipBox');
+    const simpleStatus = document.getElementById('simpleStatus');
 
     let mode = 'simple';
     let isCustomPreset = false;
@@ -61,12 +61,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 sendState({ enabled: true, threshold: p.threshold, ratio: p.ratio,
                     attack: p.attack, release: p.release, gain: p.gain,
                     bass: 0, mid: 0, treble: 0, eqEnabled: false });
-                tooltipBox.classList.add('active');
-                tooltipBox.textContent = '✓ Audio is being leveled automatically';
+                simpleStatus.textContent = 'Leveling active';
+                simpleStatus.className = 'simple-status on';
             } else {
                 sendState({ enabled: false });
-                tooltipBox.classList.remove('active');
-                tooltipBox.textContent = 'Enable audio compression to level loud and quiet parts automatically';
+                simpleStatus.textContent = '';
+                simpleStatus.className = 'simple-status';
             }
         } else {
             sendState({ enabled: on,
@@ -187,10 +187,8 @@ document.addEventListener('DOMContentLoaded', () => {
             statusDot.classList.toggle('active', !!bg.active);
 
             if (loadedMode === 'simple') {
-                tooltipBox.classList.toggle('active', !!bg.active);
-                tooltipBox.textContent = bg.active
-                    ? '✓ Audio is being leveled automatically'
-                    : 'Enable audio compression to level loud and quiet parts automatically';
+                simpleStatus.textContent = bg.active ? 'Leveling active' : '';
+                simpleStatus.className = bg.active ? 'simple-status on' : 'simple-status';
                 const t = bg.threshold;
                 let iv = 2;
                 if (t <= -35) iv = 3;
