@@ -4,7 +4,7 @@ param(
     [string]$target
 )
 
-$repoRoot = Get-Location
+$repoRoot = Split-Path -Parent $PSScriptRoot
 $zipName = "Easy.Compressor-$target.zip"
 $destinationPath = Join-Path $repoRoot $zipName
 
@@ -26,7 +26,12 @@ $filesToInclude = @(
     "content.js",
     "popup.html",
     "popup.js"
-) + (Get-ChildItem -Path (Join-Path $repoRoot "images") -Filter "*.png" | ForEach-Object { $_.Name } | ForEach-Object { "images/$_" })
+)
+
+$imagesPath = Join-Path $repoRoot "images"
+if (Test-Path $imagesPath) {
+    $filesToInclude += Get-ChildItem -Path $imagesPath -Filter "*.png" | ForEach-Object { "images/$($_.Name)" }
+}
 
 if (Test-Path $destinationPath) {
     Remove-Item $destinationPath
