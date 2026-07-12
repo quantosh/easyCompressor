@@ -8,7 +8,9 @@
 :root{color-scheme:light dark;--bg:light-dark(#fff,#292a2d);--surface:light-dark(#f8f9fa,#35363a);--text:light-dark(#202124,#e8eaed);--text-secondary:light-dark(#5f6368,#9aa0a6);--text-muted:light-dark(#80868b,#80868b);--border:light-dark(#dadce0,#5f6368);--border-hover:light-dark(#bdc1c6,#7a7f85);--accent:light-dark(#1a73e8,#8ab4f8);--accent-hover:light-dark(#1765cc,#a8c7fa);--success:light-dark(#188038,#81c995);--danger:light-dark(#d93025,#f28b82);--dot-inactive:light-dark(#dadce0,#5f6368);--slider-track:light-dark(#dadce0,#5f6368);--slider-thumb-border:light-dark(#fff,#292a2d)}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:system-ui,-apple-system,sans-serif;width:300px;padding:.625rem;background:var(--bg);color:var(--text);font-size:.8125rem;-webkit-font-smoothing:antialiased;overflow:hidden}
-.container{display:flex;flex-direction:column;gap:.5rem}
+
+/* ============ LAYOUT ============ */
+.container{display:flex;flex-direction:column;gap:.5rem;position:relative}
 .header{display:flex;align-items:center;justify-content:space-between}
 .header-left{display:flex;align-items:center;gap:.5rem}
 .status-dot{width:7px;height:7px;border-radius:50%;background:var(--dot-inactive);transition:background .3s,box-shadow .3s;flex-shrink:0}
@@ -18,31 +20,34 @@ body{font-family:system-ui,-apple-system,sans-serif;width:300px;padding:.625rem;
 .header-version{font-size:.6rem;color:var(--text-muted)}
 .gear-btn{background:none;border:none;font-size:.875rem;cursor:pointer;padding:2px;color:var(--text-secondary);transition:color .2s;line-height:1}
 .gear-btn:hover{color:var(--text)}
+
+/* ============ SETTINGS MENU ============ */
+.settings-menu{display:none;flex-direction:column;gap:.5rem;padding:.625rem .75rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;position:relative;z-index:2}
+.settings-menu.visible{display:flex}
+.menu-row{display:flex;align-items:center;justify-content:space-between}
+.menu-row label{font-size:.75rem;color:var(--text-secondary);cursor:pointer;user-select:none}
+.menu-credits{font-size:.65rem;color:var(--text-muted);text-align:center;line-height:1.5;padding-top:4px;border-top:1px solid var(--border)}
+
+/* ============ VU METER ============ */
+.meter-labels{display:flex;justify-content:space-between;font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
 .vu-wrap{height:24px;background:var(--surface);border-radius:5px;overflow:hidden;border:1px solid var(--border)}
 #vu{display:block;width:100%;height:100%}
-.meter-labels{display:flex;justify-content:space-between;font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
 .reduction-badge{visibility:hidden;display:flex;align-items:center;gap:.3rem;font-size:.7rem;color:var(--danger);font-weight:600}
 .reduction-badge.visible{visibility:visible}
 .reduction-badge::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--danger);flex-shrink:0}
 
-/* Mode visibility */
-.mode-simple-only{display:block}
+/* ============ MODE VISIBILITY ============ */
+.mode-basic-only{display:flex;flex-direction:column;gap:.5rem}
 .mode-advanced-only{display:none}
-.mode-advanced .mode-simple-only{display:none}
-.mode-advanced .mode-advanced-only{display:flex}
+.mode-advanced .mode-basic-only{display:none}
+.mode-advanced .mode-advanced-only{display:flex;flex-direction:column;gap:.5rem}
 
-/* Buttons row */
-.btn-row{display:flex;gap:6px;margin-top:2px}
-.btn-primary{flex:1;padding:.4rem .75rem;font-size:.8rem;font-weight:600;font-family:inherit;color:#fff;background:var(--accent);border:1px solid var(--accent);border-radius:6px;cursor:pointer;transition:background .2s,border-color .2s,transform .1s}
-.btn-primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
-.btn-primary:active{transform:scale(.98)}
-.btn-primary.active{background:transparent;border-color:var(--success);color:var(--success)}
-.btn-primary.active:hover{background:color-mix(in srgb,var(--success) 10%,transparent)}
-.btn-toggle{padding:.4rem .65rem;font-size:.75rem;font-weight:600;font-family:inherit;color:var(--text-secondary);background:transparent;border:1px solid var(--border);border-radius:6px;cursor:pointer;transition:color .2s,border-color .2s,background .2s;white-space:nowrap}
-.btn-toggle:hover{color:var(--text);border-color:var(--border-hover)}
-.btn-toggle.on{color:var(--accent);border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
-
-/* Intensity slider */
+/* ============ BASIC MODE ============ */
+.btn-full{width:100%;padding:.5rem .75rem;font-size:.85rem;font-weight:600;font-family:inherit;color:#fff;background:var(--accent);border:1px solid var(--accent);border-radius:6px;cursor:pointer;transition:background .2s,border-color .2s,transform .1s}
+.btn-full:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
+.btn-full:active{transform:scale(.98)}
+.btn-full.active{background:transparent;border-color:var(--success);color:var(--success)}
+.btn-full.active:hover{background:color-mix(in srgb,var(--success) 10%,transparent)}
 .intensity-wrap{display:flex;flex-direction:column;gap:4px}
 .intensity-header{display:flex;justify-content:space-between;font-size:.675rem;color:var(--text-secondary)}
 .intensity-header .val{font-weight:600;color:var(--text)}
@@ -53,7 +58,16 @@ body{font-family:system-ui,-apple-system,sans-serif;width:300px;padding:.625rem;
 .simple-status{font-size:.675rem;color:var(--text-secondary);text-align:center;min-height:1.2em}
 .simple-status.on{color:var(--success);font-weight:600}
 
-/* Panels (advanced only) */
+/* ============ ADVANCED MODE ============ */
+.btn-row{display:flex;gap:6px;margin-top:2px}
+.btn-primary{flex:1;padding:.4rem .75rem;font-size:.8rem;font-weight:600;font-family:inherit;color:#fff;background:var(--accent);border:1px solid var(--accent);border-radius:6px;cursor:pointer;transition:background .2s,border-color .2s,transform .1s}
+.btn-primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
+.btn-primary:active{transform:scale(.98)}
+.btn-primary.active{background:transparent;border-color:var(--success);color:var(--success)}
+.btn-primary.active:hover{background:color-mix(in srgb,var(--success) 10%,transparent)}
+.btn-toggle{padding:.4rem .65rem;font-size:.75rem;font-weight:600;font-family:inherit;color:var(--text-secondary);background:transparent;border:1px solid var(--border);border-radius:6px;cursor:pointer;transition:color .2s,border-color .2s,background .2s;white-space:nowrap}
+.btn-toggle:hover{color:var(--text);border-color:var(--border-hover)}
+.btn-toggle.on{color:var(--accent);border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
 .panel{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:.625rem .75rem}
 .panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
 .panel-title{font-size:.6rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em}
@@ -72,12 +86,22 @@ input[type="range"]::-moz-range-thumb{width:12px;height:12px;background:var(--ac
 .preset-btn.active{color:var(--accent);border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
 .eq-section{display:block}
 .eq-section.hidden{display:none}
+
+/* Toggle switch (small, for EQ panel) */
 .toggle-sm{position:relative;width:28px;height:16px;flex-shrink:0;cursor:pointer}
 .toggle-sm input{position:absolute;opacity:0;width:0;height:0}
 .toggle-sm .track{position:absolute;inset:0;background:var(--slider-track);border-radius:8px;transition:.25s}
-.toggle-sm .thumb{position:absolute;width:12px;height:12px;top:2px;left:2px;background:var(--text-secondary);border-radius:50%;transition:.25s}
+.toggle-sm .thumb{position:absolute;width:12px;height:12px;top:2px;left:2px;background:#fff;border-radius:50%;transition:.25s;z-index:1}
 .toggle-sm input:checked+.track{background:var(--success)}
-.toggle-sm input:checked~.thumb{left:14px;background:var(--success)}
+.toggle-sm input:checked~.thumb{left:14px}
+
+/* Toggle switch (medium, for settings menu) */
+.toggle-md{position:relative;width:36px;height:20px;flex-shrink:0;cursor:pointer}
+.toggle-md input{position:absolute;opacity:0;width:0;height:0}
+.toggle-md .track{position:absolute;inset:0;background:var(--slider-track);border-radius:10px;transition:.25s}
+.toggle-md .thumb{position:absolute;width:16px;height:16px;top:2px;left:2px;background:#fff;border-radius:50%;transition:.25s;z-index:1}
+.toggle-md input:checked+.track{background:var(--accent)}
+.toggle-md input:checked~.thumb{left:18px}
 </style>
 </head>
 <body>
@@ -89,7 +113,21 @@ input[type="range"]::-moz-range-thumb{width:12px;height:12px;background:var(--ac
     </div>
     <div class="header-right">
       <span class="header-version">v1.0</span>
-      <button class="gear-btn" id="gearBtn" title="Toggle mode">⚙</button>
+      <button class="gear-btn" id="gearBtn" title="Settings">⚙</button>
+    </div>
+  </div>
+
+  <div class="settings-menu" id="settingsMenu">
+    <div class="menu-row">
+      <label>Advanced Mode</label>
+      <label class="toggle-md">
+        <input type="checkbox" id="modeToggle">
+        <span class="track"></span>
+        <span class="thumb"></span>
+      </label>
+    </div>
+    <div class="menu-credits">
+      Easy Compressor v1.0<br>Made by @quantosh
     </div>
   </div>
 
@@ -99,12 +137,9 @@ input[type="range"]::-moz-range-thumb{width:12px;height:12px;background:var(--ac
   </div>
   <div class="vu-wrap"><canvas id="vu" width="278" height="24"></canvas></div>
 
-  <div class="btn-row">
-    <button id="enableBtn" class="btn-primary">Enable Compressor</button>
-    <button id="eqToggle" class="btn-toggle on mode-advanced-only">EQ</button>
-  </div>
-
-  <div class="mode-simple-only">
+  <!-- BASIC MODE -->
+  <div class="mode-basic-only">
+    <button id="enableBtnBasic" class="btn-full">Enable Compressor</button>
     <div class="intensity-wrap">
       <div class="intensity-header">
         <span>Intensity</span>
@@ -120,7 +155,13 @@ input[type="range"]::-moz-range-thumb{width:12px;height:12px;background:var(--ac
     <div class="simple-status" id="simpleStatus"></div>
   </div>
 
+  <!-- ADVANCED MODE -->
   <div class="mode-advanced-only">
+    <div class="btn-row">
+      <button id="enableBtnAdv" class="btn-primary">Enable Compressor</button>
+      <button id="eqToggle" class="btn-toggle on">EQ</button>
+    </div>
+
     <div class="panel">
       <div class="panel-title">Compressor</div>
       <div class="s-group">

@@ -20,7 +20,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusDot = document.getElementById('statusDot');
     const reductionBadge = document.getElementById('reductionBadge');
     const gearBtn = document.getElementById('gearBtn');
-    const enableBtn = document.getElementById('enableBtn');
+    const settingsMenu = document.getElementById('settingsMenu');
+    const modeToggle = document.getElementById('modeToggle');
+
+    const enableBtnBasic = document.getElementById('enableBtnBasic');
+    const enableBtnAdv = document.getElementById('enableBtnAdv');
     const eqToggle = document.getElementById('eqToggle');
     const eqSection = document.getElementById('eqSection');
     const eqEnableToggle = document.getElementById('eqEnableToggle');
@@ -29,35 +33,40 @@ document.addEventListener('DOMContentLoaded', () => {
     const intensityVal = document.getElementById('intensityVal');
     const simpleStatus = document.getElementById('simpleStatus');
 
-    let mode = 'simple';
+    let compressorOn = false;
     let isCustomPreset = false;
 
     chrome.runtime.onMessage.addListener(msg => {
         if (msg.action === 'audioLevel') drawMeter(msg.level, msg.reduction);
     });
 
-    function setMode(m) {
-        mode = m;
-        root.classList.remove('mode-simple', 'mode-advanced');
-        root.classList.add(`mode-${m}`);
-        chrome.runtime.sendMessage({ action: 'setMode', mode: m }).catch(() => {});
-    }
-
     function sendState(payload) {
         chrome.runtime.sendMessage({ action: 'updateState', ...payload }).catch(() => {});
     }
 
-    // Shared enable button
-    enableBtn.addEventListener('click', () => {
-        const on = !enableBtn.classList.contains('active');
-        enableBtn.textContent = on ? 'Disable Compressor' : 'Enable Compressor';
-        enableBtn.classList.toggle('active', on);
+    function setOnState(on) {
+        compressorOn = on;
+        [enableBtnBasic, enableBtnAdv].forEach(btn => {
+            if (!btn) return;
+            btn.textContent = on ? 'Disable Compressor' : 'Enable Compressor';
+            btn.classList.toggle('active', on);
+        });
         statusDot.classList.toggle('active', on);
+    }
 
-        if (mode === 'simple') {
+    function doEnable(on) {
+        setOnState(on);
+        if (modeToggle.checked) {
+            sendState({ enabled: on,
+                threshold: document.getElementById('threshold-sl').value,
+                ratio: document.getElementById('ratio-sl').value,
+                attack: document.getElementById('attack-sl').value,
+                release: document.getElementById('release-sl').value,
+                gain: document.getElementById('gain-sl').value });
+        } else {
             if (on) {
-                const val = parseInt(intensitySlider.value);
-                const p = INTENSITY_PRESETS[val];
+                const v = parseInt(intensitySlider.value);
+                const p = INTENSITY_PRESETS[v];
                 sendState({ enabled: true, threshold: p.threshold, ratio: p.ratio,
                     attack: p.attack, release: p.release, gain: p.gain,
                     bass: 0, mid: 0, treble: 0, eqEnabled: false });
@@ -68,38 +77,50 @@ document.addEventListener('DOMContentLoaded', () => {
                 simpleStatus.textContent = '';
                 simpleStatus.className = 'simple-status';
             }
-        } else {
-            sendState({ enabled: on,
-                threshold: document.getElementById('threshold-sl').value,
-                ratio: document.getElementById('ratio-sl').value,
-                attack: document.getElementById('attack-sl').value,
-                release: document.getElementById('release-sl').value,
-                gain: document.getElementById('gain-sl').value });
         }
+    }
+
+    // Both enable buttons share the same logic
+    enableBtnBasic.addEventListener('click', () => doEnable(!compressorOn));
+    enableBtnAdv.addEventListener('click', () => doEnable(!compressorOn));
+
+    // Gear menu
+    gearBtn.addEventListener('click', () => {
+        settingsMenu.classList.toggle('visible');
     });
 
-    // Intensity slider (simple mode)
+    // Mode toggle
+    modeToggle.addEventListener('change', () => {
+        root.classList.toggle('mode-advanced', modeToggle.checked);
+        root.classList.toggle('mode-basic', !modeToggle.checked);
+        chrome.runtime.sendMessage({ action: 'setMode', mode: modeToggle.checked ? 'advanced' : 'basic' }).catch(() => {});
+        settingsMenu.classList.remove('visible');
+    });
+
+    // Intensity (basic mode)
     intensitySlider.addEventListener('input', () => {
-        const val = parseInt(intensitySlider.value);
-        intensityVal.textContent = INTENSITY_PRESETS[val].label;
-        if (enableBtn.classList.contains('active')) {
-            const p = INTENSITY_PRESETS[val];
+        const v = parseInt(intensitySlider.value);
+        intensityVal.textContent = INTENSITY_PRESETS[v].label;
+        if (compressorOn) {
+            const p = INTENSITY_PRESETS[v];
             sendState({ threshold: p.threshold, ratio: p.ratio,
                 attack: p.attack, release: p.release, gain: p.gain });
         }
     });
 
-    // EQ toggle (advanced mode)
+    // EQ visibility toggle (advanced mode)
     eqToggle.addEventListener('click', () => {
         const vis = eqSection.classList.contains('hidden');
         eqSection.classList.toggle('hidden', !vis);
         eqToggle.classList.toggle('on', !vis);
     });
 
+    // EQ enable/disable toggle
     eqEnableToggle.addEventListener('change', () => {
         sendState({ eqEnabled: eqEnableToggle.checked });
     });
 
+    // EQ presets
     presetBtns.forEach(b => b.addEventListener('click', () => {
         presetBtns.forEach(p => p.classList.remove('active'));
         b.classList.add('active');
@@ -128,8 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const vl = document.getElementById(`${key}-val`);
         if (sl) sl.addEventListener('input', () => {
             const val = parseFloat(sl.value);
-            const label = key === 'ratio' ? `${val}:1` : `${val} ms`;
-            vl.textContent = key === 'ratio' || key === 'attack' || key === 'release' ? label : `${val} dB`;
+            vl.textContent = key === 'ratio' ? `${val}:1` : (key === 'attack' || key === 'release' ? `${val} ms` : `${val} dB`);
             sendState({ [key]: val });
         });
     });
@@ -144,11 +164,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!isCustomPreset) { isCustomPreset = true; presetBtns.forEach(p => p.classList.remove('active')); }
             sendState({ [key.replace('eq-', '')]: val });
         });
-    });
-
-    // Gear toggle
-    gearBtn.addEventListener('click', () => {
-        setMode(mode === 'simple' ? 'advanced' : 'simple');
     });
 
     // VU meter
@@ -180,22 +195,15 @@ document.addEventListener('DOMContentLoaded', () => {
     function init() {
         chrome.runtime.sendMessage({ action: 'getState' }, (bg) => {
             if (!bg) return;
-            const loadedMode = bg.mode || 'simple';
-            setMode(loadedMode);
-            enableBtn.textContent = bg.active ? 'Disable Compressor' : 'Enable Compressor';
-            enableBtn.classList.toggle('active', !!bg.active);
-            statusDot.classList.toggle('active', !!bg.active);
+            const loadedMode = bg.mode || 'basic';
+            const isAdv = loadedMode === 'advanced';
+            modeToggle.checked = isAdv;
+            root.classList.toggle('mode-advanced', isAdv);
+            root.classList.toggle('mode-basic', !isAdv);
 
-            if (loadedMode === 'simple') {
-                simpleStatus.textContent = bg.active ? 'Leveling active' : '';
-                simpleStatus.className = bg.active ? 'simple-status on' : 'simple-status';
-                const t = bg.threshold;
-                let iv = 2;
-                if (t <= -35) iv = 3;
-                else if (t >= -25) iv = 1;
-                intensitySlider.value = iv;
-                intensityVal.textContent = INTENSITY_PRESETS[iv].label;
-            } else {
+            setOnState(!!bg.active);
+
+            if (isAdv) {
                 const eq = bg.eq || {};
                 ['threshold', 'ratio', 'attack', 'release', 'gain'].forEach(key => {
                     const sl = document.getElementById(`${key}-sl`);
@@ -216,6 +224,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 eqEnableToggle.checked = eq.enabled !== false;
                 eqToggle.classList.add('on');
                 eqSection.classList.remove('hidden');
+            } else {
+                const t = bg.threshold;
+                let iv = 2;
+                if (t <= -35) iv = 3;
+                else if (t >= -25) iv = 1;
+                intensitySlider.value = iv;
+                intensityVal.textContent = INTENSITY_PRESETS[iv].label;
+                simpleStatus.textContent = bg.active ? 'Leveling active' : '';
+                simpleStatus.className = bg.active ? 'simple-status on' : 'simple-status';
             }
         });
     }
