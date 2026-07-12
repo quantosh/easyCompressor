@@ -42,8 +42,8 @@ body{font-family:system-ui,-apple-system,sans-serif;width:300px;padding:.625rem;
 .mode-advanced .mode-advanced-only{display:flex;flex-direction:column;gap:.5rem}
 
 /* BASIC MODE */
-.btn-full{width:100%;padding:.5rem .75rem;font-size:.85rem;font-weight:600;font-family:inherit;color:var(--success);background:transparent;border:1px solid var(--success);border-radius:6px;cursor:pointer;transition:background .2s,border-color .2s,transform .1s}
-.btn-full:hover{background:color-mix(in srgb,var(--success) 10%,transparent)}
+.btn-full{width:100%;padding:.5rem .75rem;font-size:.85rem;font-weight:600;font-family:inherit;color:var(--accent);background:transparent;border:1px solid var(--accent);border-radius:6px;cursor:pointer;transition:background .2s,border-color .2s,transform .1s}
+.btn-full:hover{background:color-mix(in srgb,var(--accent) 10%,transparent)}
 .btn-full:active{transform:scale(.98)}
 .btn-full.active{color:var(--danger);border-color:var(--danger);background:transparent}
 .btn-full.active:hover{background:color-mix(in srgb,var(--danger) 10%,transparent)}
@@ -57,8 +57,8 @@ body{font-family:system-ui,-apple-system,sans-serif;width:300px;padding:.625rem;
 
 /* ADVANCED MODE */
 .btn-row{display:flex;gap:6px}
-.btn-primary{flex:1;padding:.5rem .75rem;font-size:.8rem;font-weight:600;font-family:inherit;color:var(--success);background:transparent;border:1px solid var(--success);border-radius:6px;cursor:pointer;transition:background .2s,border-color .2s,transform .1s}
-.btn-primary:hover{background:color-mix(in srgb,var(--success) 10%,transparent)}
+.btn-primary{flex:1;padding:.5rem .75rem;font-size:.8rem;font-weight:600;font-family:inherit;color:var(--accent);background:transparent;border:1px solid var(--accent);border-radius:6px;cursor:pointer;transition:background .2s,border-color .2s,transform .1s}
+.btn-primary:hover{background:color-mix(in srgb,var(--accent) 10%,transparent)}
 .btn-primary:active{transform:scale(.98)}
 .btn-primary.active{color:var(--danger);border-color:var(--danger);background:transparent}
 .btn-primary.active:hover{background:color-mix(in srgb,var(--danger) 10%,transparent)}
@@ -89,7 +89,7 @@ input[type="range"]::-moz-range-thumb{width:12px;height:12px;background:var(--ac
 .toggle-sm input{position:absolute;opacity:0;width:0;height:0}
 .toggle-sm .track{position:absolute;inset:0;background:var(--slider-track);border-radius:8px;transition:.25s}
 .toggle-sm .thumb{position:absolute;width:12px;height:12px;top:2px;left:2px;background:#fff;border-radius:50%;transition:.25s;z-index:1}
-.toggle-sm input:checked+.track{background:var(--success)}
+.toggle-sm input:checked+.track{background:var(--accent)}
 .toggle-sm input:checked~.thumb{left:14px}
 
 /* TOGGLE MEDIUM */
