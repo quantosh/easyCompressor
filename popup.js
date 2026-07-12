@@ -137,8 +137,8 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('[data-p="flat"]')?.classList.add('active');
         isCustomPreset = false;
         eqEnableToggle.checked = true;
-        eqToggle.classList.add('on');
-        eqSection.classList.remove('hidden');
+        eqToggle.classList.remove('on');
+        eqSection.classList.add('hidden');
 
         closeSettings();
     }
@@ -275,8 +275,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (found) { presetBtns.forEach(p => p.classList.toggle('active', p.dataset.p === found)); isCustomPreset = false; }
                 else { presetBtns.forEach(p => p.classList.remove('active')); isCustomPreset = true; }
                 eqEnableToggle.checked = eq.enabled !== false;
-                eqToggle.classList.add('on');
-                eqSection.classList.remove('hidden');
             } else {
                 const t = bg.threshold;
                 let iv = 2;
