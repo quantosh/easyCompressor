@@ -34,6 +34,7 @@ try {
     Copy-Item (Join-Path $repoRoot "popup.html") $stagingDir
     Copy-Item (Join-Path $repoRoot "popup.css") $stagingDir
     Copy-Item (Join-Path $repoRoot "popup.js") $stagingDir
+    Copy-Item (Join-Path $repoRoot "LICENSE") $stagingDir
 
     $imagesPath = Join-Path $repoRoot "images"
     if (Test-Path $imagesPath) {
