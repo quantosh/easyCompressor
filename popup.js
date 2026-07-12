@@ -29,7 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const enableBtnBasic = document.getElementById('enableBtnBasic');
     const enableBtnAdv = document.getElementById('enableBtnAdv');
-    const eqToggle = document.getElementById('eqToggle');
     const eqSection = document.getElementById('eqSection');
     const eqEnableToggle = document.getElementById('eqEnableToggle');
     const presetBtns = document.querySelectorAll('[data-p]');
@@ -141,8 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('[data-p="flat"]')?.classList.add('active');
         isCustomPreset = false;
         eqEnableToggle.checked = true;
-        eqToggle.classList.remove('on');
-        eqSection.classList.add('hidden');
+        eqSection.classList.remove('hidden');
 
         closeSettings();
     }
@@ -165,16 +163,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // EQ visibility toggle (advanced mode)
-    eqToggle.addEventListener('click', () => {
-        const vis = eqSection.classList.contains('hidden');
-        eqSection.classList.toggle('hidden', !vis);
-        eqToggle.classList.toggle('on', vis);
-    });
-
-    // EQ enable/disable toggle
+    // EQ enable/disable toggle (in settings)
     eqEnableToggle.addEventListener('change', () => {
-        sendState({ eqEnabled: eqEnableToggle.checked });
+        const on = eqEnableToggle.checked;
+        sendState({ eqEnabled: on });
+        eqSection.classList.toggle('hidden', !on);
     });
 
     // EQ presets
@@ -279,6 +272,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (found) { presetBtns.forEach(p => p.classList.toggle('active', p.dataset.p === found)); isCustomPreset = false; }
                 else { presetBtns.forEach(p => p.classList.remove('active')); isCustomPreset = true; }
                 eqEnableToggle.checked = eq.enabled !== false;
+                eqSection.classList.toggle('hidden', eq.enabled === false);
             } else {
                 const t = bg.threshold;
                 let iv = 2;
