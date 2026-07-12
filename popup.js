@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const enableBtn = document.getElementById('enableBtn');
     const eqToggle = document.getElementById('eqToggle');
     const eqSection = document.getElementById('eqSection');
-    const eqEnableBtn = document.getElementById('eqEnableBtn');
+    const eqEnableToggle = document.getElementById('eqEnableToggle');
     const presetBtns = document.querySelectorAll('[data-p]');
     const intensitySlider = document.getElementById('intensitySlider');
     const intensityVal = document.getElementById('intensityVal');
@@ -96,11 +96,8 @@ document.addEventListener('DOMContentLoaded', () => {
         eqToggle.classList.toggle('on', !vis);
     });
 
-    eqEnableBtn.addEventListener('click', () => {
-        const en = !eqEnableBtn.classList.contains('on');
-        eqEnableBtn.classList.toggle('on', en);
-        eqEnableBtn.textContent = en ? 'ON' : 'OFF';
-        sendState({ eqEnabled: en });
+    eqEnableToggle.addEventListener('change', () => {
+        sendState({ eqEnabled: eqEnableToggle.checked });
     });
 
     presetBtns.forEach(b => b.addEventListener('click', () => {
@@ -218,8 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 if (found) { presetBtns.forEach(p => p.classList.toggle('active', p.dataset.p === found)); isCustomPreset = false; }
                 else { presetBtns.forEach(p => p.classList.remove('active')); isCustomPreset = true; }
-                eqEnableBtn.classList.toggle('on', eq.enabled !== false);
-                eqEnableBtn.textContent = eq.enabled !== false ? 'ON' : 'OFF';
+                eqEnableToggle.checked = eq.enabled !== false;
                 eqToggle.classList.add('on');
                 eqSection.classList.remove('hidden');
             }

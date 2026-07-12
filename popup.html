@@ -72,6 +72,12 @@ input[type="range"]::-moz-range-thumb{width:12px;height:12px;background:var(--ac
 .preset-btn.active{color:var(--accent);border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
 .eq-section{display:block}
 .eq-section.hidden{display:none}
+.toggle-sm{position:relative;width:28px;height:16px;flex-shrink:0;cursor:pointer}
+.toggle-sm input{position:absolute;opacity:0;width:0;height:0}
+.toggle-sm .track{position:absolute;inset:0;background:var(--slider-track);border-radius:8px;transition:.25s}
+.toggle-sm .thumb{position:absolute;width:12px;height:12px;top:2px;left:2px;background:var(--text-secondary);border-radius:50%;transition:.25s}
+.toggle-sm input:checked+.track{background:var(--success)}
+.toggle-sm input:checked~.thumb{left:14px;background:var(--success)}
 </style>
 </head>
 <body>
@@ -146,7 +152,11 @@ input[type="range"]::-moz-range-thumb{width:12px;height:12px;background:var(--ac
     <div class="panel eq-section" id="eqSection">
       <div class="panel-header">
         <span class="panel-title">Equalizer</span>
-        <button id="eqEnableBtn" class="btn-toggle on">ON</button>
+        <label class="toggle-sm">
+          <input type="checkbox" id="eqEnableToggle" checked>
+          <span class="track"></span>
+          <span class="thumb"></span>
+        </label>
       </div>
       <div class="presets" id="eqPresets">
         <button class="preset-btn active" data-p="flat">Flat</button>
