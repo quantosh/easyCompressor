@@ -18,26 +18,31 @@ body{font-family:system-ui,-apple-system,sans-serif;width:300px;padding:.625rem;
 .header-version{font-size:.65rem;color:var(--text-muted)}
 .gear-btn{background:none;border:none;font-size:.875rem;cursor:pointer;padding:2px;color:var(--text-secondary);transition:color .2s;line-height:1}
 .gear-btn:hover{color:var(--text)}
-.vu-wrap{height:24px;background:var(--surface);border-radius:5px;overflow:hidden;border:1px solid var(--border);margin-bottom:2px}
+.vu-wrap{height:24px;background:var(--surface);border-radius:5px;overflow:hidden;border:1px solid var(--border)}
 #vu{display:block;width:100%;height:100%}
 .meter-labels{display:flex;justify-content:space-between;font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
 .reduction-badge{visibility:hidden;display:flex;align-items:center;gap:.3rem;font-size:.7rem;color:var(--danger);font-weight:600}
 .reduction-badge.visible{visibility:visible}
 .reduction-badge::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--danger);flex-shrink:0}
 
-/* Simple view */
-.view-simple{display:flex;flex-direction:column;gap:.5rem}
-.view-simple.hidden{display:none}
-.toggle-large{display:flex;flex-direction:column;align-items:center;gap:4px}
-.toggle-large-row{display:flex;align-items:center;gap:8px}
-.toggle-large-labels{display:flex;justify-content:space-between;width:100%;font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
-.toggle-switch{position:relative;width:44px;height:24px;flex-shrink:0;cursor:pointer}
-.toggle-switch input{position:absolute;opacity:0;width:0;height:0}
-.toggle-track{position:absolute;inset:0;background:var(--slider-track);border-radius:12px;transition:.25s}
-.toggle-thumb{position:absolute;width:20px;height:20px;top:2px;left:2px;background:var(--text);border-radius:50%;transition:.25s}
-.toggle-switch input:checked+.toggle-track{background:var(--success)}
-.toggle-switch input:checked~.toggle-thumb{left:22px}
-.toggle-state-text{font-size:.75rem;font-weight:600;color:var(--text-secondary);min-width:30px;text-align:center}
+/* Mode visibility */
+.mode-simple-only{display:block}
+.mode-advanced-only{display:none}
+.mode-advanced .mode-simple-only{display:none}
+.mode-advanced .mode-advanced-only{display:flex}
+
+/* Buttons row */
+.btn-row{display:flex;gap:6px}
+.btn-primary{flex:1;padding:.4rem .75rem;font-size:.8rem;font-weight:600;font-family:inherit;color:#fff;background:var(--accent);border:1px solid var(--accent);border-radius:6px;cursor:pointer;transition:background .2s,border-color .2s,transform .1s}
+.btn-primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
+.btn-primary:active{transform:scale(.98)}
+.btn-primary.active{background:transparent;border-color:var(--success);color:var(--success)}
+.btn-primary.active:hover{background:color-mix(in srgb,var(--success) 10%,transparent)}
+.btn-toggle{padding:.4rem .65rem;font-size:.75rem;font-weight:600;font-family:inherit;color:var(--text-secondary);background:transparent;border:1px solid var(--border);border-radius:6px;cursor:pointer;transition:color .2s,border-color .2s,background .2s;white-space:nowrap}
+.btn-toggle:hover{color:var(--text);border-color:var(--border-hover)}
+.btn-toggle.on{color:var(--accent);border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
+
+/* Intensity slider */
 .intensity-wrap{display:flex;flex-direction:column;gap:4px}
 .intensity-header{display:flex;justify-content:space-between;font-size:.675rem;color:var(--text-secondary)}
 .intensity-header .val{font-weight:600;color:var(--text)}
@@ -48,18 +53,7 @@ body{font-family:system-ui,-apple-system,sans-serif;width:300px;padding:.625rem;
 .tooltip-box{padding:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;font-size:.7rem;color:var(--text-secondary);line-height:1.4;text-align:center}
 .tooltip-box.active{color:var(--success);border-color:var(--success)}
 
-/* Advanced view */
-.view-advanced{display:none;flex-direction:column;gap:.375rem}
-.view-advanced.visible{display:flex}
-.btn-primary{width:100%;padding:.4rem .75rem;font-size:.8rem;font-weight:600;font-family:inherit;color:#fff;background:var(--accent);border:1px solid var(--accent);border-radius:6px;cursor:pointer;transition:background .2s,border-color .2s,transform .1s}
-.btn-primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
-.btn-primary:active{transform:scale(.98)}
-.btn-primary.active{background:transparent;border-color:var(--success);color:var(--success)}
-.btn-primary.active:hover{background:color-mix(in srgb,var(--success) 10%,transparent)}
-.btn-row{display:flex;gap:6px}
-.btn-toggle{padding:.4rem .65rem;font-size:.75rem;font-weight:600;font-family:inherit;color:var(--text-secondary);background:transparent;border:1px solid var(--border);border-radius:6px;cursor:pointer;transition:color .2s,border-color .2s,background .2s;white-space:nowrap}
-.btn-toggle:hover{color:var(--text);border-color:var(--border-hover)}
-.btn-toggle.on{color:var(--accent);border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
+/* Panels (advanced only) */
 .panel{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:.5rem .625rem}
 .panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
 .panel-title{font-size:.6rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em}
@@ -81,7 +75,7 @@ input[type="range"]::-moz-range-thumb{width:12px;height:12px;background:var(--ac
 </style>
 </head>
 <body>
-<div class="container">
+<div class="container" id="root">
   <div class="header">
     <div class="header-left">
       <span class="status-dot" id="statusDot"></span>
@@ -99,24 +93,16 @@ input[type="range"]::-moz-range-thumb{width:12px;height:12px;background:var(--ac
   </div>
   <div class="vu-wrap"><canvas id="vu" width="278" height="24"></canvas></div>
 
-  <!-- View: Simple -->
-  <div class="view-simple" id="viewSimple">
-    <div class="toggle-large">
-      <div class="toggle-large-row">
-        <span class="toggle-state-text" id="simpleStateOff">OFF</span>
-        <label class="toggle-switch">
-          <input type="checkbox" id="simpleToggle">
-          <span class="toggle-track"></span>
-          <span class="toggle-thumb"></span>
-        </label>
-        <span class="toggle-state-text" id="simpleStateOn">ON</span>
-      </div>
-    </div>
+  <div class="btn-row">
+    <button id="enableBtn" class="btn-primary">Enable Compressor</button>
+    <button id="eqToggle" class="btn-toggle on mode-advanced-only">EQ</button>
+  </div>
 
+  <div class="mode-simple-only">
     <div class="intensity-wrap">
       <div class="intensity-header">
         <span>Intensity</span>
-        <span class="val" id="intensityVal">Light</span>
+        <span class="val" id="intensityVal">Medium</span>
       </div>
       <input type="range" id="intensitySlider" min="1" max="3" step="1" value="2">
       <div class="intensity-ticks">
@@ -125,19 +111,12 @@ input[type="range"]::-moz-range-thumb{width:12px;height:12px;background:var(--ac
         <span>Heavy</span>
       </div>
     </div>
-
     <div class="tooltip-box" id="tooltipBox">
       Enable audio compression to level loud and quiet parts automatically
     </div>
   </div>
 
-  <!-- View: Advanced -->
-  <div class="view-advanced" id="viewAdvanced">
-    <div class="btn-row">
-      <button id="compressBtn" class="btn-primary">Enable Compressor</button>
-      <button id="eqToggle" class="btn-toggle on">EQ</button>
-    </div>
-
+  <div class="mode-advanced-only">
     <div class="panel">
       <div class="panel-title">Compressor</div>
       <div class="s-group">

@@ -12,29 +12,22 @@ const EQ_PRESETS = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+    const root = document.getElementById('root');
     const vu = document.getElementById('vu');
     const ctx = vu.getContext('2d');
     vu.width = vu.clientWidth || 278; vu.height = 24;
 
     const statusDot = document.getElementById('statusDot');
     const reductionBadge = document.getElementById('reductionBadge');
-
     const gearBtn = document.getElementById('gearBtn');
-    const viewSimple = document.getElementById('viewSimple');
-    const viewAdv = document.getElementById('viewAdvanced');
-
-    const simpleToggle = document.getElementById('simpleToggle');
-    const simpleStateOff = document.getElementById('simpleStateOff');
-    const simpleStateOn = document.getElementById('simpleStateOn');
-    const intensitySlider = document.getElementById('intensitySlider');
-    const intensityVal = document.getElementById('intensityVal');
-    const tooltipBox = document.getElementById('tooltipBox');
-
-    const compressBtn = document.getElementById('compressBtn');
+    const enableBtn = document.getElementById('enableBtn');
     const eqToggle = document.getElementById('eqToggle');
     const eqSection = document.getElementById('eqSection');
     const eqEnableBtn = document.getElementById('eqEnableBtn');
     const presetBtns = document.querySelectorAll('[data-p]');
+    const intensitySlider = document.getElementById('intensitySlider');
+    const intensityVal = document.getElementById('intensityVal');
+    const tooltipBox = document.getElementById('tooltipBox');
 
     let mode = 'simple';
     let isCustomPreset = false;
@@ -43,10 +36,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (msg.action === 'audioLevel') drawMeter(msg.level, msg.reduction);
     });
 
-    function showMode(m) {
+    function setMode(m) {
         mode = m;
-        viewSimple.classList.toggle('hidden', m !== 'simple');
-        viewAdv.classList.toggle('visible', m === 'advanced');
+        root.classList.remove('mode-simple', 'mode-advanced');
+        root.classList.add(`mode-${m}`);
         chrome.runtime.sendMessage({ action: 'setMode', mode: m }).catch(() => {});
     }
 
@@ -54,57 +47,51 @@ document.addEventListener('DOMContentLoaded', () => {
         chrome.runtime.sendMessage({ action: 'updateState', ...payload }).catch(() => {});
     }
 
-    function applyIntensity(val) {
-        const p = INTENSITY_PRESETS[val];
-        if (!p) return;
-        intensityVal.textContent = p.label;
-        simpleToggle.checked ? sendState({
-            enabled: true, threshold: p.threshold, ratio: p.ratio,
-            attack: p.attack, release: p.release, gain: p.gain,
-            bass: 0, mid: 0, treble: 0, eqEnabled: false
-        }) : null;
-    }
+    // Shared enable button
+    enableBtn.addEventListener('click', () => {
+        const on = !enableBtn.classList.contains('active');
+        enableBtn.textContent = on ? 'Disable Compressor' : 'Enable Compressor';
+        enableBtn.classList.toggle('active', on);
+        statusDot.classList.toggle('active', on);
 
-    simpleToggle.addEventListener('change', () => {
-        const on = simpleToggle.checked;
-        simpleStateOff.style.color = on ? 'var(--text-muted)' : 'var(--text)';
-        simpleStateOn.style.color = on ? 'var(--success)' : 'var(--text-muted)';
-        tooltipBox.classList.toggle('active', on);
-        tooltipBox.textContent = on
-            ? '✓ Audio is being leveled automatically'
-            : 'Enable audio compression to level loud and quiet parts automatically';
-        if (on) {
-            const val = parseInt(intensitySlider.value);
-            applyIntensity(val);
+        if (mode === 'simple') {
+            if (on) {
+                const val = parseInt(intensitySlider.value);
+                const p = INTENSITY_PRESETS[val];
+                sendState({ enabled: true, threshold: p.threshold, ratio: p.ratio,
+                    attack: p.attack, release: p.release, gain: p.gain,
+                    bass: 0, mid: 0, treble: 0, eqEnabled: false });
+                tooltipBox.classList.add('active');
+                tooltipBox.textContent = '✓ Audio is being leveled automatically';
+            } else {
+                sendState({ enabled: false });
+                tooltipBox.classList.remove('active');
+                tooltipBox.textContent = 'Enable audio compression to level loud and quiet parts automatically';
+            }
         } else {
-            sendState({ enabled: false });
+            sendState({ enabled: on,
+                threshold: document.getElementById('threshold-sl').value,
+                ratio: document.getElementById('ratio-sl').value,
+                attack: document.getElementById('attack-sl').value,
+                release: document.getElementById('release-sl').value,
+                gain: document.getElementById('gain-sl').value });
         }
     });
 
+    // Intensity slider (simple mode)
     intensitySlider.addEventListener('input', () => {
         const val = parseInt(intensitySlider.value);
-        if (simpleToggle.checked) applyIntensity(val);
-        else intensityVal.textContent = INTENSITY_PRESETS[val].label;
+        intensityVal.textContent = INTENSITY_PRESETS[val].label;
+        if (enableBtn.classList.contains('active')) {
+            const p = INTENSITY_PRESETS[val];
+            sendState({ threshold: p.threshold, ratio: p.ratio,
+                attack: p.attack, release: p.release, gain: p.gain });
+        }
     });
 
-    // Advanced view controls
-    compressBtn.addEventListener('click', () => {
-        const on = !compressBtn.classList.contains('active');
-        compressBtn.textContent = on ? 'Disable Compressor' : 'Enable Compressor';
-        compressBtn.classList.toggle('active', on);
-        statusDot.classList.toggle('active', on);
-        sendState({
-            enabled: on,
-            threshold: document.getElementById('threshold-sl').value,
-            ratio: document.getElementById('ratio-sl').value,
-            attack: document.getElementById('attack-sl').value,
-            release: document.getElementById('release-sl').value,
-            gain: document.getElementById('gain-sl').value
-        });
-    });
-
+    // EQ toggle (advanced mode)
     eqToggle.addEventListener('click', () => {
-        const vis = !eqSection.classList.contains('hidden');
+        const vis = eqSection.classList.contains('hidden');
         eqSection.classList.toggle('hidden', !vis);
         eqToggle.classList.toggle('on', !vis);
     });
@@ -122,53 +109,49 @@ document.addEventListener('DOMContentLoaded', () => {
         const v = EQ_PRESETS[b.dataset.p];
         if (v) {
             isCustomPreset = false;
-            state.bass = v.bass; state.mid = v.mid; state.treble = v.treble;
-            syncAdvancedView();
+            syncEQView(v.bass, v.mid, v.treble);
             sendState({ bass: v.bass, mid: v.mid, treble: v.treble });
         }
     }));
 
-    function syncAdvancedView() {
-        document.getElementById('eq-bass-val').textContent = formatDB(state.bass);
-        document.getElementById('eq-mid-val').textContent = formatDB(state.mid);
-        document.getElementById('eq-treble-val').textContent = formatDB(state.treble);
-        document.getElementById('eq-bass-sl').value = state.bass;
-        document.getElementById('eq-mid-sl').value = state.mid;
-        document.getElementById('eq-treble-sl').value = state.treble;
+    function syncEQView(bass, mid, treble) {
+        document.getElementById('eq-bass-val').textContent = fmtDB(bass);
+        document.getElementById('eq-mid-val').textContent = fmtDB(mid);
+        document.getElementById('eq-treble-val').textContent = fmtDB(treble);
+        document.getElementById('eq-bass-sl').value = bass;
+        document.getElementById('eq-mid-sl').value = mid;
+        document.getElementById('eq-treble-sl').value = treble;
     }
 
-    function formatDB(v) { return `${v > 0 ? '+' : ''}${v} dB`; }
+    function fmtDB(v) { return `${v > 0 ? '+' : ''}${v} dB`; }
 
+    // Advanced compressor sliders
     ['threshold', 'ratio', 'attack', 'release', 'gain'].forEach(key => {
         const sl = document.getElementById(`${key}-sl`);
         const vl = document.getElementById(`${key}-val`);
         if (sl) sl.addEventListener('input', () => {
             const val = parseFloat(sl.value);
-            if (key === 'ratio') vl.textContent = `${val}:1`;
-            else if (key === 'attack' || key === 'release') vl.textContent = `${val} ms`;
-            else if (key === 'gain') vl.textContent = `${val} dB`;
-            else vl.textContent = `${val} dB`;
+            const label = key === 'ratio' ? `${val}:1` : `${val} ms`;
+            vl.textContent = key === 'ratio' || key === 'attack' || key === 'release' ? label : `${val} dB`;
             sendState({ [key]: val });
         });
     });
 
+    // Advanced EQ sliders
     ['eq-bass', 'eq-mid', 'eq-treble'].forEach(key => {
         const sl = document.getElementById(`${key}-sl`);
         const vl = document.getElementById(`${key}-val`);
         if (sl) sl.addEventListener('input', () => {
             const val = parseFloat(sl.value);
-            vl.textContent = formatDB(val);
-            if (!isCustomPreset) {
-                isCustomPreset = true;
-                presetBtns.forEach(p => p.classList.remove('active'));
-            }
-            state[key.replace('eq-', '')] = val;
+            vl.textContent = fmtDB(val);
+            if (!isCustomPreset) { isCustomPreset = true; presetBtns.forEach(p => p.classList.remove('active')); }
             sendState({ [key.replace('eq-', '')]: val });
         });
     });
 
+    // Gear toggle
     gearBtn.addEventListener('click', () => {
-        showMode(mode === 'simple' ? 'advanced' : 'simple');
+        setMode(mode === 'simple' ? 'advanced' : 'simple');
     });
 
     // VU meter
@@ -197,24 +180,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (reductionBadge) reductionBadge.classList.toggle('visible', (window._vuRd || 0) > 0.02);
     }
 
-    let state = { enabled: false };
-
     function init() {
         chrome.runtime.sendMessage({ action: 'getState' }, (bg) => {
             if (!bg) return;
             const loadedMode = bg.mode || 'simple';
-            showMode(loadedMode);
+            setMode(loadedMode);
+            enableBtn.textContent = bg.active ? 'Disable Compressor' : 'Enable Compressor';
+            enableBtn.classList.toggle('active', !!bg.active);
+            statusDot.classList.toggle('active', !!bg.active);
 
             if (loadedMode === 'simple') {
-                // Restore simple toggle state
-                simpleToggle.checked = !!bg.active;
-                simpleStateOff.style.color = bg.active ? 'var(--text-muted)' : 'var(--text)';
-                simpleStateOn.style.color = bg.active ? 'var(--success)' : 'var(--text-muted)';
                 tooltipBox.classList.toggle('active', !!bg.active);
                 tooltipBox.textContent = bg.active
                     ? '✓ Audio is being leveled automatically'
                     : 'Enable audio compression to level loud and quiet parts automatically';
-                // Set intensity to match threshold
                 const t = bg.threshold;
                 let iv = 2;
                 if (t <= -35) iv = 3;
@@ -222,38 +201,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 intensitySlider.value = iv;
                 intensityVal.textContent = INTENSITY_PRESETS[iv].label;
             } else {
-                // Advanced mode
                 const eq = bg.eq || {};
-                state.bass = eq.bass || 0; state.mid = eq.mid || 0; state.treble = eq.treble || 0;
                 ['threshold', 'ratio', 'attack', 'release', 'gain'].forEach(key => {
                     const sl = document.getElementById(`${key}-sl`);
                     const vl = document.getElementById(`${key}-val`);
                     if (sl) sl.value = bg[key] ?? sl.value;
                     if (vl) {
                         const v = parseFloat(sl ? sl.value : 0);
-                        if (key === 'ratio') vl.textContent = `${v}:1`;
-                        else if (key === 'attack' || key === 'release') vl.textContent = `${v} ms`;
-                        else vl.textContent = `${v} dB`;
+                        vl.textContent = key === 'ratio' ? `${v}:1` : (key === 'attack' || key === 'release' ? `${v} ms` : `${v} dB`);
                     }
                 });
-                syncAdvancedView();
-                compressBtn.textContent = bg.active ? 'Disable Compressor' : 'Enable Compressor';
-                compressBtn.classList.toggle('active', !!bg.active);
-                statusDot.classList.toggle('active', !!bg.active);
-
+                syncEQView(eq.bass || 0, eq.mid || 0, eq.treble || 0);
                 let found = null;
                 for (const [name, v] of Object.entries(EQ_PRESETS)) {
-                    if (v.bass === state.bass && v.mid === state.mid && v.treble === state.treble) { found = name; break; }
+                    if (v.bass === (eq.bass || 0) && v.mid === (eq.mid || 0) && v.treble === (eq.treble || 0)) { found = name; break; }
                 }
-                if (found) {
-                    presetBtns.forEach(p => p.classList.toggle('active', p.dataset.p === found));
-                    isCustomPreset = false;
-                } else {
-                    presetBtns.forEach(p => p.classList.remove('active'));
-                    isCustomPreset = true;
-                }
+                if (found) { presetBtns.forEach(p => p.classList.toggle('active', p.dataset.p === found)); isCustomPreset = false; }
+                else { presetBtns.forEach(p => p.classList.remove('active')); isCustomPreset = true; }
                 eqEnableBtn.classList.toggle('on', eq.enabled !== false);
                 eqEnableBtn.textContent = eq.enabled !== false ? 'ON' : 'OFF';
+                eqToggle.classList.add('on');
+                eqSection.classList.remove('hidden');
             }
         });
     }
